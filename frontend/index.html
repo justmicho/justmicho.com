@@ -2,25 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Chat with Dhimitri</title>
+  <title>Search Dhimitri Dinella</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="timestamp"></div>
-  <!-- Chat toggle icon -->
-  <div id="chat-toggle" onclick="toggleChat()">💬</div>
+  <div class="google-style-container">
+    <h1 class="logo">Dhimitri</h1>
+    <div class="search-box">
+      <input type="text" id="prompt" placeholder="Search something about Dhimitri..." />
+      <button onclick="askBot()">🔍</button>
+    </div>
 
-  <!-- Chat widget window -->
-  <div id="chat-widget">
-    <h4>Chat with Dhimitri</h4>
-    <textarea id="prompt" placeholder="Ask something about Dhimitri..."></textarea>
-    <button onclick="askBot()">Send</button>
+    <div class="suggestions">
+      <p><strong>Try searching:</strong></p>
+      <ul>
+        <li onclick="setPrompt('What projects has Dhimitri worked on?')">What projects has Dhimitri worked on?</li>
+        <li onclick="setPrompt('Where did Dhimitri go to school?')">Where did Dhimitri go to school?</li>
+        <li onclick="setPrompt('What skills does Dhimitri have?')">What skills does Dhimitri have?</li>
+        <li onclick="setPrompt('What was Dhimitri’s role at iCodice?')">What was Dhimitri’s role at iCodice?</li>
+      </ul>
+    </div>
+
     <div id="response"></div>
   </div>
-
+  <script>
+    function setPrompt(text) {
+      document.getElementById('prompt').value = text;
+      askBot();
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
-
-
