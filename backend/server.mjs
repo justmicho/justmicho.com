@@ -4,8 +4,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 dotenv.config();
-console.log("✅ Loaded key:", process.env.OPENROUTER_KEY ? "YES" : "NO");
-console.log("🔑 Key preview:", process.env.OPENROUTER_KEY?.slice(0, 10)); // for debug only
 
 const app = express();
 app.use(cors());
