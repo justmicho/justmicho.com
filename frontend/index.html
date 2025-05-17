@@ -20,7 +20,7 @@
       responseEl.innerText = "Thinking...";
 
       try {
-        const response = await fetch("http://localhost:3000/chat", {
+        const response = await fetch("https://justmicho-com.onrender.com/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -57,5 +57,3 @@ He's skilled in Python, SQL, Java, HTML/CSS, React, and project coordination. He
 </body>
 </html>
 
-
-<!-- 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 -->
