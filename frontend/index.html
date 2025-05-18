@@ -6,26 +6,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  <div class="overlay"></div>
+
+  <div class="main-header">
+    <div class="logo-container">
+      <img src="pic.jpg" alt="Dhimitri's photo" class="profile-pic" />
+      <h1 class="logo-text">Dhimitri Dinella</h1>
+    </div>
+    <div class="social-links">
+      <button class="project-btn" onclick="openModal()">Projects</button>
+      <a href="https://www.linkedin.com/in/dhimitridinella" target="_blank" class="social-btn">LinkedIn</a>
+      <a href="https://github.com/justmicho" target="_blank" class="social-btn">GitHub</a>
+    </div>
+  </div>
+  
   <div id="timestamp"></div>
   <div class="google-style-container">
-    <h1 class="logo">Dhimitri</h1>
+    <h1 class="logo">Welcome to my website</h1>
     <div class="search-box">
-      <input type="text" id="prompt" placeholder="Search something about Dhimitri..." />
+      <input type="text" id="prompt" placeholder="Get to know Dhimitri..." />
       <button onclick="askBot()">🔍</button>
     </div>
 
+    <p class="try-searching"><strong>Try searching:</strong></p>
     <div class="suggestions">
-      <p><strong>Try searching:</strong></p>
       <ul>
         <li onclick="setPrompt('What projects has Dhimitri worked on?')">What projects has Dhimitri worked on?</li>
         <li onclick="setPrompt('Where did Dhimitri go to school?')">Where did Dhimitri go to school?</li>
         <li onclick="setPrompt('What skills does Dhimitri have?')">What skills does Dhimitri have?</li>
-        <li onclick="setPrompt('What was Dhimitri’s role at iCodice?')">What was Dhimitri’s role at iCodice?</li>
+        <li onclick="setPrompt('What experience does Dhimitri have?')">What experience does Dhimitri have?</li>
+
       </ul>
     </div>
 
-    <div id="response"></div>
+    <div id="response" class="response-box">Waiting for a question...</div>
+
   </div>
   <script>
     function setPrompt(text) {
@@ -33,6 +50,27 @@
       askBot();
     }
   </script>
+  <!-- Modal -->
+  <div id="projectModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Select a Project</h2>
+      <ul class="project-list">
+        <li><a href="/frontend/guessmynumber/index.html" target="_blank">Guess My Number</a></li>
+        <li><a href="/frontend/piggame/index.html" target="_blank">Pig Game</a></li>
+        <li><a href="https://github.com/justmicho/hospitalDatabase" target="_blank">Hospital Database</a></li>
+        <li><a href="https://github.com/justmicho/chicago_lobbyist" target="_blank">Chicago Lobbyist</a></li>
+        <li><a href="https://github.com/justmicho/blackjack-game" target="_blank">BlackJack Game (Coming Soon)</a></li>
+
+
+
+        <!-- <li><a href="/frontend/starter/project3.html" target="_blank">Chicago Lobbyist App</a></li> -->
+      </ul>
+    </div>
+  </div>
   <script src="script.js"></script>
+ 
+  
 </body>
+
 </html>
