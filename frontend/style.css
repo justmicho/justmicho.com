@@ -66,14 +66,12 @@ body {
   border-radius: 10px;
   transition: background-color 0.3s;
   cursor: pointer;
-  border: none;            
-  
+  border: none;
 }
 
 .project-btn:hover {
-  background-color: #4f4f4f; 
+  background-color: #4f4f4f;
 }
-
 
 .social-btn {
   font-size: 1rem;
@@ -123,19 +121,18 @@ body {
   text-align: center;
   transform: translateX(-200px);
   white-space: nowrap;
-  
-  padding: 20px 40px;            
-  border-radius: 12px;           
-  background-color: rgba(0, 0, 0, 0.3); 
-  display: inline-block;        
+  padding: 20px 40px;
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: inline-block;
 }
 
-.try-searching{
+.try-searching {
   color: white;
-  padding: 10px 10px;          
-  border-radius: 12px;        
+  padding: 10px 10px;
+  border-radius: 12px;
   background-color: rgba(0, 0, 0, 0.3);
-  display: inline-block;  
+  display: inline-block;
 }
 
 .search-box {
@@ -247,7 +244,7 @@ body {
   text-decoration: underline;
 }
 
-
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -297,3 +294,62 @@ body {
   cursor: pointer;
 }
 
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .main-header {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    padding: 10px 15px;
+    gap: 10px;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+  }
+
+  .social-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .project-btn, .social-btn {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .google-style-container {
+    padding-top: 100px;
+    max-width: 90%;
+  }
+
+  .logo {
+    font-size: 2.8rem;
+    transform: none;
+    padding: 15px 20px;
+    white-space: normal;
+  }
+
+  .search-box input,
+  .search-box button {
+    font-size: 1rem;
+    padding: 12px 14px;
+  }
+
+  .suggestions li {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  #response {
+    font-size: 1rem;
+    max-width: 90%;
+  }
+
+  #timestamp {
+    top: 100px;
+    right: 20px;
+    font-size: 0.9rem;
+  }
+}
