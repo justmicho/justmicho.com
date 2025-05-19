@@ -198,15 +198,20 @@ main {
   }
 
   .btn--roll {
-    top: auto;
-    bottom: 7rem;
-  }
+  top: auto;
+  bottom: 7rem;
+  left: auto;
+  right: 2rem;
+  transform: none;
+}
 
-  .btn--hold {
-    top: auto;
-    bottom: 2rem;
-  }
-
+.btn--hold {
+  top: auto;
+  bottom: 2rem;
+  left: auto;
+  right: 2rem;
+  transform: none;
+}
   .btn--new {
     top: 2rem;
   }
