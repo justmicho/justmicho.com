@@ -1,13 +1,16 @@
+// Toggle the visibility of the floating chat widget
 function toggleChat() {
   const widget = document.getElementById("chat-widget");
   widget.style.display = widget.style.display === "none" ? "block" : "none";
 }
 
+// Prefill prompt input with a suggestion and automatically submit it
 function setPrompt(text) {
   document.getElementById("prompt").value = text;
   askBot();
 }
 
+// Display current date and time, updating every second
 function updateTime() {
   const now = new Date();
   const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -22,6 +25,7 @@ function updateTime() {
 setInterval(updateTime, 1000);
 updateTime();
 
+// Send prompt to backend and display AI-generated answer
 async function askBot() {
   const input = document.getElementById("prompt").value;
   const responseEl = document.getElementById("response");
@@ -60,7 +64,6 @@ async function askBot() {
           If anyone asks how this chatbot works, explain:
           "This chatbot was built using HTML, CSS, and JavaScript for the frontend. It connects to a Node.js + Express backend hosted on Render and uses OpenRouter to access a GPT-like model. It’s integrated into Dhimitri’s personal site via a floating widget he designed."`
           },
-          
           { role: "user", content: input }
         ]
       })
@@ -85,20 +88,63 @@ async function askBot() {
   }
 }
 
+// Open the modal for project selection
 function openModal() {
   document.getElementById("projectModal").style.display = "block";
 }
 
+// Close the modal
 function closeModal() {
   document.getElementById("projectModal").style.display = "none";
 }
 
+// Close modal if clicked outside the modal content
 window.onclick = function(event) {
   const modal = document.getElementById("projectModal");
   if (event.target === modal) {
     closeModal();
   }
 };
+
+// Submit a suggestion to Supabase and temporarily disable the button
+async function submitSuggestion() {
+  const input = document.getElementById("suggestion");
+  const message = input.value.trim();
+  const submitBtn = document.getElementById("submit-btn");
+
+  if (!message) {
+    alert("Please enter a suggestion.");
+    return;
+  }
+
+  const { data, error } = await fetch("https://wimeyvutwkbeyuwiunvu.supabase.co/rest/v1/suggestions", {
+    method: "POST",
+    headers: {
+      "apikey": "YOUR_API_KEY",
+      "Authorization": "Bearer YOUR_API_KEY",
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ message })
+  });
+
+  if (!error) {
+    input.value = "";
+    submitBtn.textContent = "Submitted!";
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = "0.6";
+
+    setTimeout(() => {
+      submitBtn.textContent = "Submit";
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "1";
+    }, 5000);
+  } else {
+    alert("Something went wrong. Please try again.");
+    console.error(error);
+  }
+}
+
 
 // http://localhost:3000/chat -->
 // https://justmicho-com.onrender.com/chat 

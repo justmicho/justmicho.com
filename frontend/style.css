@@ -353,3 +353,42 @@ body {
     font-size: 0.9rem;
   }
 }
+
+.suggestion-box {
+  position: absolute;
+  bottom: 260px;
+  left: 30px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 16px;
+  border-radius: 12px;
+  width: 300px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  z-index: 10;
+}
+
+.suggestion-box textarea {
+  width: 100%;
+  padding: auto auto auto auto;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.suggestion-box button {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.suggestion-box button:hover {
+  background-color: #357ae8;
+}
