@@ -117,32 +117,34 @@ async function submitSuggestion() {
     return;
   }
 
-  const { data, error } = await fetch("https://wimeyvutwkbeyuwiunvu.supabase.co/rest/v1/suggestions", {
-    method: "POST",
-    headers: {
-      "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpbWV5dnV0d2tiZXl1d2l1bnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTIzOTQsImV4cCI6MjA2MzE4ODM5NH0.f61wLU6TqQny2JWLodONiZ4nbRnv7Z4v_orPC8iP4NY",
-      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpbWV5dnV0d2tiZXl1d2l1bnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTIzOTQsImV4cCI6MjA2MzE4ODM5NH0.f61wLU6TqQny2JWLodONiZ4nbRnv7Z4v_orPC8iP4NY",
-      "Content-Type": "application/json",
-      "Prefer": "return=minimal"
-    },
-    body: JSON.stringify({ message })
-  });
+  const res = await fetch("https://wimeyvutwkbeyuwiunvu.supabase.co/rest/v1/suggestions", {
+  method: "POST",
+  headers: {
+    "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpbWV5dnV0d2tiZXl1d2l1bnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTIzOTQsImV4cCI6MjA2MzE4ODM5NH0.f61wLU6TqQny2JWLodONiZ4nbRnv7Z4v_orPC8iP4NY",
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpbWV5dnV0d2tiZXl1d2l1bnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTIzOTQsImV4cCI6MjA2MzE4ODM5NH0.f61wLU6TqQny2JWLodONiZ4nbRnv7Z4v_orPC8iP4NY",
+    "Content-Type": "application/json",
+    "Prefer": "return=minimal"
+  },
+  body: JSON.stringify({ message })
+});
 
-  if (!error) {
-    input.value = "";
-    submitBtn.textContent = "Submitted!";
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = "0.6";
+if (res.ok) {
+  input.value = "";
+  submitBtn.textContent = "Submitted!";
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = "0.6";
 
-    setTimeout(() => {
-      submitBtn.textContent = "Submit";
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = "1";
-    }, 5000);
-  } else {
-    alert("Something went wrong. Please try again.");
-    console.error(error);
-  }
+  setTimeout(() => {
+    submitBtn.textContent = "Submit";
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = "1";
+  }, 5000);
+} else {
+  const errorText = await res.text();
+  console.error("Something went wrong:", errorText);
+  alert("Something went wrong. Please try again.");
+}
+
 }
 
 
