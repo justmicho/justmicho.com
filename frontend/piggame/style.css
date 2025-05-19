@@ -198,20 +198,21 @@ main {
   }
 
   .btn--roll {
-  top: auto;
-  bottom: 7rem;
+  top: 40%;
+  bottom: auto;
   left: auto;
   right: 2rem;
-  transform: none;
+  transform: translateY(-50%);
 }
 
 .btn--hold {
-  top: auto;
-  bottom: 2rem;
+  top: 55%;
+  bottom: auto;
   left: auto;
   right: 2rem;
-  transform: none;
+  transform: translateY(-50%);
 }
+
   .btn--new {
     top: 2rem;
   }
