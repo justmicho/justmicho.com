@@ -32,7 +32,7 @@ async function askBot() {
   responseEl.innerText = "Thinking...\n Sorry for the wait, I'm the only AI bot that is free.\n I will get back to you as soon as possible.";
 
   try {
-    const response = await fetch("https://justmicho-com.onrender.com/chat", {
+    const response = await fetch("http://localhost:3000/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

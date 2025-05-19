@@ -355,28 +355,25 @@ body {
 }
 
 /* SUGGESTION BOX STYLES */
-/* Desktop / Default styles */
-#suggestion-box {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
+.suggestion-box {
+position: absolute;
+  bottom: 250px;
+  left: 20px; 
   background: rgba(255, 255, 255, 0.95);
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   z-index: 9999;
   width: 300px;
-  text-align: left;
 }
 
-#suggestion-box h3 {
+.suggestion-box h3 {
   font-size: 1.2rem;
   margin-bottom: 10px;
-  display: block;
 }
 
-#suggestion-box textarea {
-  width: 100%;
+.suggestion-box textarea {
+  width: 90%;
   height: 80px;
   resize: none;
   font-size: 1rem;
@@ -385,7 +382,7 @@ body {
   border-radius: 8px;
 }
 
-#suggestion-box button {
+.suggestion-box button {
   margin-top: 10px;
   width: 100%;
   background-color: #4285f4;
@@ -397,16 +394,20 @@ body {
   cursor: pointer;
 }
 
-#suggestion-box button:disabled {
+.suggestion-box button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* MOBILE-ONLY styles (≤600px) */
+/* Mobile styles for suggestion box */
 @media (max-width: 600px) {
-  #suggestion-box {
-    position: static;
+  .suggestion-header {
+    display: none;
+  }
+
+  .suggestion-box {
     width: 100%;
+    max-width: 100%;
     margin: 20px auto 0 auto;
     padding: 0;
     background: transparent;
@@ -417,19 +418,15 @@ body {
     justify-content: center;
   }
 
-  #suggestion-box h3 {
-    display: none;
-  }
-
-  #suggestion-box textarea {
+  .suggestion-box textarea {
     width: 90%;
     height: 70px;
-    margin-bottom: 10px;
     font-size: 1rem;
+    margin-bottom: 10px;
     text-align: left;
   }
 
-  #suggestion-box button {
+  .suggestion-box button {
     width: 90%;
     font-size: 1rem;
   }
