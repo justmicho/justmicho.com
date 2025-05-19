@@ -54,6 +54,16 @@ async function askBot() {
           - Reduced service response time by 30% with a new scheduling system
           
           Dhimitri's key projects include:
+          - Personal Portfolio Website: A responsive site showcasing his projects and skills, built with HTML, CSS, and JavaScript. It features a custom chatbot for user interaction.
+            - Personal Portfolio also features:
+            - A custom project showcase modal built with vanilla JavaScript and CSS
+            - A live clock display using the JavaScript Date API
+            - A suggestion box feature powered by Supabase (PostgreSQL backend as a service)
+            - Responsive layout and design using media queries
+            - Custom favicon and meta settings for branding
+            - A set of interactive JavaScript games (Guess My Number, Pig Game, Blackjack) styled with CSS and hosted as individual project pages
+            - GitHub integration and version control
+            - Deployment using Netlify for the frontend and Render for the backend
           - Hospital Management Database: Optimized SQL/ER model for 200+ patients
           - Blackjack Game (in progress): A browser-based card game styled like a real casino table. Built using HTML, CSS, and JavaScript with interactive UI, card animations, and player/dealer logic under development.
           - Chicago Lobbyist Database App: Python + SQLite app with 50,000+ records and data visualizations using Matplotlib
@@ -64,16 +74,6 @@ async function askBot() {
           
           If anyone asks how this chatbot works, explain:
           "This chatbot was built using HTML, CSS, and JavaScript for the frontend. It connects to a Node.js + Express backend hosted on Render and uses OpenRouter to access a GPT-like model. It’s integrated into Dhimitri’s personal site via a floating widget he designed.
-
-          The website also features:
-          - A custom project showcase modal built with vanilla JavaScript and CSS
-          - A live clock display using the JavaScript Date API
-          - A suggestion box feature powered by Supabase (PostgreSQL backend as a service)
-          - Responsive layout and design using media queries
-          - Custom favicon and meta settings for branding
-          - A set of interactive JavaScript games (Guess My Number, Pig Game, Blackjack) styled with CSS and hosted as individual project pages
-          - GitHub integration and version control
-          - Deployment using Netlify for the frontend and Render for the backend
 
           This full-stack setup enables both static content and dynamic interaction through the AI assistant and live user suggestion system."
 `,
