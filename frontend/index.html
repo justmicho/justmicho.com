@@ -1,79 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>JM: Home</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-</head>
-<link rel="icon" type="image/png" href="favicon.png" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>JM: Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
-<body>
-  <div class="overlay"></div>
+  <body>
+    <div class="overlay"></div>
 
-  <div class="main-header">
-    <div class="logo-container">
-      <img src="pic.jpg" alt="Dhimitri's photo" class="profile-pic" />
-      <h1 class="logo-text">Hello I'm Dhimitri Dinella </h1>
-    </div>
-    <div class="social-links">
-      <button class="project-btn" onclick="openModal()">Projects</button>
-      <a href="https://www.linkedin.com/in/dhimitridinella" target="_blank" class="social-btn">LinkedIn</a>
-      <a href="https://github.com/justmicho" target="_blank" class="social-btn">GitHub</a>
-    </div>
-  </div>
-  
-  <div id="timestamp"></div>
-  <div class="google-style-container">
-    <h1 class="logo">Welcome to my world</h1>
-    <div class="search-box">
-      <input type="text" id="prompt" placeholder="Get to know Dhimitri..." />
-      <button onclick="askBot()">🔍</button>
-    </div>
-
-    <p class="try-searching"><strong>Try searching:</strong></p>
-    <div class="suggestions">
-      <ul>
-        <li onclick="setPrompt('What projects has Dhimitri worked on?')">What projects has Dhimitri worked on?</li>
-        <li onclick="setPrompt('Where did Dhimitri go to school?')">Where did Dhimitri go to school?</li>
-        <li onclick="setPrompt('What skills does Dhimitri have?')">What skills does Dhimitri have?</li>
-        <li onclick="setPrompt('What experience does Dhimitri have?')">What experience does Dhimitri have?</li>
-
-      </ul>
+    <div class="main-header">
+      <div class="logo-container">
+        <img src="pic.jpg" alt="Dhimitri's photo" class="profile-pic" />
+        <h1 class="logo-text">Hello I'm Dhimitri Dinella</h1>
+      </div>
+      <div class="social-links">
+        <button class="project-btn" onclick="openModal()">Projects</button>
+        <a
+          href="https://www.linkedin.com/in/dhimitridinella"
+          target="_blank"
+          class="social-btn"
+          >LinkedIn</a
+        >
+        <a
+          href="https://github.com/justmicho"
+          target="_blank"
+          class="social-btn"
+          >GitHub</a
+        >
+      </div>
     </div>
 
-    <div id="response" class="response-box">Waiting for a question...</div>
+    <div id="timestamp"></div>
+    <div class="google-style-container">
+      <h1 class="logo">Welcome to my world</h1>
+      <div class="search-box">
+        <input type="text" id="prompt" placeholder="Get to know Dhimitri..." />
+        <button onclick="askBot()">🔍</button>
+      </div>
 
-  </div>
-  <script>
-    function setPrompt(text) {
-      document.getElementById('prompt').value = text;
-      askBot();
-    }
-  </script>
-  <!-- Modal -->
-  <div id="projectModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h2>Select a Project</h2>
-      <ul class="project-list">
-        <li><a href="/guessmynumber/index.html" target="_blank">Guess My Number</a></li>
-        <li><a href="/piggame/index.html" target="_blank">Pig Game</a></li>
-        <li><a href="https://github.com/justmicho/hospitalDatabase" target="_blank">Hospital Database</a></li>
-        <li><a href="https://github.com/justmicho/chicago_lobbyist" target="_blank">Chicago Lobbyist</a></li>
-        <li><a href="https://github.com/justmicho/blackjack-game" target="_blank">BlackJack Game (Coming Soon)</a></li>
+      <p class="try-searching"><strong>Try searching:</strong></p>
+      <div class="suggestions">
+        <ul>
+          <li onclick="setPrompt('What projects has Dhimitri worked on?')">
+            What projects has Dhimitri worked on?
+          </li>
+          <li onclick="setPrompt('Where did Dhimitri go to school?')">
+            Where did Dhimitri go to school?
+          </li>
+          <li onclick="setPrompt('What skills does Dhimitri have?')">
+            What skills does Dhimitri have?
+          </li>
+          <li onclick="setPrompt('What experience does Dhimitri have?')">
+            What experience does Dhimitri have?
+          </li>
+        </ul>
+      </div>
 
-      </ul>
+      <div id="response" class="response-box">Waiting for a question...</div>
     </div>
-  </div>
-  <script src="script.js"></script>
- 
-  <div class="suggestion-box">
-  <h3 class="suggestion-header">Have a suggestion?</h3>
-  <textarea id="suggestion" placeholder="Share your thoughts..." rows="4"></textarea>
-  <button id="submit-btn" onclick="submitSuggestion()">Submit</button>
-</div>
+    <script>
+      function setPrompt(text) {
+        document.getElementById("prompt").value = text;
+        askBot();
+      }
+    </script>
+    <!-- Modal -->
+    <div id="projectModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Select a Project</h2>
+        <ul class="project-list">
+          <li>
+            <a href="/guessmynumber/index.html" target="_blank"
+              >Guess My Number</a
+            >
+          </li>
+          <li><a href="/piggame/index.html" target="_blank">Pig Game</a></li>
+          <li>
+            <a
+              href="https://github.com/justmicho/hospitalDatabase"
+              target="_blank"
+              >Hospital Database</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/justmicho/chicago_lobbyist"
+              target="_blank"
+              >Chicago Lobbyist</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/justmicho/blackjack-game"
+              target="_blank"
+              >BlackJack Game (Coming Soon)</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+    <script src="script.js"></script>
 
-</body>
-
+    <div class="suggestion-box">
+      <h3 class="suggestion-header">Have a suggestion?</h3>
+      <textarea
+        id="suggestion"
+        placeholder="Share your thoughts..."
+        rows="4"
+      ></textarea>
+      <button id="submit-btn" onclick="submitSuggestion()">Submit</button>
+    </div>
+  </body>
 </html>
