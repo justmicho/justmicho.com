@@ -406,20 +406,17 @@ position: absolute;
   }
 
   .suggestion-box {
+    position: static; /* Let it flow under content */
     width: 100%;
-    margin: 10px auto 0 auto;
+    max-width: 100%;
+    margin: 20px auto 0 auto;
+    padding: 0;
     background: transparent;
     box-shadow: none;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .input-row {
-    display: flex;
     flex-direction: row;
     justify-content: center;
-    width: 90%;
+    align-items: center;
     gap: 10px;
   }
 
@@ -428,8 +425,10 @@ position: absolute;
     height: 60px;
     font-size: 1rem;
     padding: 10px;
-    border-radius: 8px;
     border: 1px solid #ccc;
+    border-radius: 8px;
+    width: auto; /* allow flex to control width */
+    margin: 0;
   }
 
   .suggestion-box button {
@@ -442,6 +441,6 @@ position: absolute;
     color: white;
     border: none;
     cursor: pointer;
+    margin: 0;
   }
 }
-
