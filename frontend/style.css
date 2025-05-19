@@ -401,7 +401,46 @@ position: absolute;
 
 /* Mobile styles for suggestion box */
 @media (max-width: 600px) {
-  .suggestion-box {
+  .suggestion-header {
     display: none;
+  }
+
+  .suggestion-box {
+    position: static; /* Let it flow under content */
+    width: 75%;
+    max-width: 100%;
+    margin: 5px auto 0 auto;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .suggestion-box textarea {
+    flex: 1;
+    height: 20px;
+    font-size: 1rem;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 20px; /* allow flex to control width */
+    margin: 0;
+  }
+
+  .suggestion-box button {
+    width: 80px;
+    height: 30px;
+    font-size: 0.9rem;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin: 0;
   }
 }
