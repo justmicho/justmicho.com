@@ -386,6 +386,7 @@ body {
     display: block;
     font-size: 1rem;
     height: 70px;
+    
   }
 
   #suggestion-box button {
@@ -399,5 +400,19 @@ body {
     text-align: center;
     font-size: 1rem;
     margin-top: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .suggestion-header {
+    color: white;
+    padding: 10px 10px;
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: inline-block;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 10px;
   }
 }
