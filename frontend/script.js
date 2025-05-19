@@ -120,8 +120,8 @@ async function submitSuggestion() {
   const { data, error } = await fetch("https://wimeyvutwkbeyuwiunvu.supabase.co/rest/v1/suggestions", {
     method: "POST",
     headers: {
-      "apikey": "YOUR_API_KEY",
-      "Authorization": "Bearer YOUR_API_KEY",
+      "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpbWV5dnV0d2tiZXl1d2l1bnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTIzOTQsImV4cCI6MjA2MzE4ODM5NH0.f61wLU6TqQny2JWLodONiZ4nbRnv7Z4v_orPC8iP4NY",
+      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpbWV5dnV0d2tiZXl1d2l1bnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTIzOTQsImV4cCI6MjA2MzE4ODM5NH0.f61wLU6TqQny2JWLodONiZ4nbRnv7Z4v_orPC8iP4NY",
       "Content-Type": "application/json",
       "Prefer": "return=minimal"
     },
