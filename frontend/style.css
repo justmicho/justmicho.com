@@ -307,6 +307,7 @@ body {
   cursor: pointer;
 }
 
+
 /* Mobile responsiveness */
 @media (max-width: 600px) {
   .main-header {
