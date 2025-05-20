@@ -83,6 +83,18 @@ body {
   border-radius: 10px;
   transition: background-color 0.3s;
 }
+.apijoke{
+  font-size: 1rem;
+  background-color: rgb(194, 165, 1);
+  color: white;
+  text-decoration: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  transition: background-color 0.3s;
+}
+.apijoke:hover{
+  background-color: rgb(157, 134, 3);
+}
 
 .social-btn:last-of-type {
   background-color: #333;
