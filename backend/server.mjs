@@ -6,7 +6,23 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// ✅ Set allowed origins for CORS
+const allowedOrigins = ['https://www.justmicho.com', 'http://localhost:3000'];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 app.post('/chat', async (req, res) => {
@@ -23,7 +39,6 @@ app.post('/chat', async (req, res) => {
         model: "mistralai/mistral-7b-instruct", 
         messages
       })
-      
     });
 
     const data = await response.json();
