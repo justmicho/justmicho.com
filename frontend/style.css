@@ -371,7 +371,7 @@ body {
 
 /* SUGGESTION BOX STYLES */
 .suggestion-box {
-  position: fixed;
+  position: absolute;
   bottom: 250px;
   left: 20px;
   background: rgba(255, 255, 255, 0.95);
