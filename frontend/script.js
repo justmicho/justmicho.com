@@ -24,7 +24,9 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
       lastErr = err;
       const wait = Math.min(1000 * 2 ** attempt, 10000);
       console.log(
-        `Attempt ${attempt + 1} failed: ${err?.message || err}. Retrying in ${wait}ms...`
+        `Attempt ${attempt + 1} failed: ${
+          err?.message || err
+        }. Retrying in ${wait}ms...`
       );
       await new Promise((r) => setTimeout(r, wait));
     }
@@ -112,11 +114,11 @@ It's part of Dhimitri's personal portfolio website (justmicho.com). The site inc
 - Supabase-powered suggestion box
 - Responsive layout and live clock
 - JavaScript game demos (Guess My Number, Pig Game, Blackjack)
-- GitHub + PDF resume integration."`
+- GitHub + PDF resume integration."`,
           },
-          { role: "user", content: input }
-        ]
-      })
+          { role: "user", content: input },
+        ],
+      }),
     });
 
     // Defensive parsing for clearer errors
@@ -124,7 +126,9 @@ It's part of Dhimitri's personal portfolio website (justmicho.com). The site inc
     if (!ct.includes("application/json")) {
       const text = await response.text();
       throw new Error(
-        `Expected JSON, got ${response.status} ${response.statusText} (${ct}). Body: ${text.slice(0, 300)}`
+        `Expected JSON, got ${response.status} ${
+          response.statusText
+        } (${ct}). Body: ${text.slice(0, 300)}`
       );
     }
     const data = await response.json();
@@ -164,59 +168,6 @@ function closeModal() {
   if (modal) modal.style.display = "none";
 }
 
-// ---------- SUGGESTION SUBMISSION ----------
-async function submitSuggestion() {
-  const input = document.getElementById("suggestion");
-  const submitBtn = document.getElementById("submit-btn");
-  if (!input || !submitBtn) return;
-
-  const message = input.value.trim();
-  if (!message) {
-    alert("Please enter a suggestion.");
-    return;
-  }
-
-  const originalText = submitBtn.textContent;
-  submitBtn.textContent = "Submitting...";
-  submitBtn.disabled = true;
-
-  try {
-    const res = await fetchWithRetry(`${API_BASE}/submit-suggestion`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    // Optional: defensive parse (uncomment if you want to inspect bad bodies)
-    // const ct = (res.headers.get("content-type") || "").toLowerCase();
-    // if (!ct.includes("application/json")) {
-    //   const t = await res.text();
-    //   throw new Error(`Expected JSON, got ${res.status} ${res.statusText} (${ct}). Body: ${t.slice(0,300)}`);
-    // }
-
-    if (res.ok) {
-      input.value = "";
-      submitBtn.textContent = "Submitted!";
-      submitBtn.style.opacity = "0.6";
-      setTimeout(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = "1";
-      }, 5000);
-    } else {
-      console.error("Suggestion failed:", await res.text());
-      alert("Something went wrong. Please try again.");
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    }
-  } catch (err) {
-    console.error("Suggestion error:", err);
-    alert("Network error. Please try again.");
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
-  }
-}
-
 // ---------- BINDINGS (no inline handlers) ----------
 document.addEventListener("DOMContentLoaded", () => {
   // Warm up backend
@@ -240,12 +191,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const closeModalBtn = document.querySelector("[data-action='close-modal']");
   if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
-
-  const submitSuggestionBtn = document.querySelector(
-    "[data-action='submit-suggestion']"
-  );
-  if (submitSuggestionBtn)
-    submitSuggestionBtn.addEventListener("click", submitSuggestion);
 
   // Suggestion chips
   document.querySelectorAll(".suggestions [data-prompt]").forEach((li) => {
