@@ -1,3 +1,4 @@
+// server.mjs
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -17,7 +18,7 @@ const ALLOWED_ORIGINS = [
 
 const corsMw = cors({
   origin(origin, cb) {
-    if (!origin) return cb(null, true);
+    if (!origin) return cb(null, true);                   // allow curl/postman
     if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
     return cb(new Error(`CORS: Origin ${origin} not allowed`));
   },
@@ -30,8 +31,13 @@ const corsMw = cors({
 app.use(corsMw);
 app.use(express.json());
 
-// Handle preflight for all routes (Express 5-safe)
-app.options("(.*)", corsMw);
+// ✅ Express-5-safe preflight handler (no wildcard pattern)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); // No Content
+  }
+  next();
+});
 
 /* ---------- Health ---------- */
 app.get("/", (_req, res) => res.send("OK"));
