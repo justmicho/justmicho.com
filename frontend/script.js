@@ -4,6 +4,28 @@ const BACKEND_URL =
     ? "http://localhost:3000"
     : "https://justmicho-backend.onrender.com";
 
+// ---------- RETRY FETCH UTILITY ----------
+async function fetchWithRetry(url, options, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      return response;
+    } catch (error) {
+      console.log(`Attempt ${attempt + 1} failed:`, error.message);
+      
+      // If this is the last attempt, throw the error
+      if (attempt === maxRetries - 1) {
+        throw new Error(`Failed after ${maxRetries} attempts. Backend might be cold-starting.`);
+      }
+      
+      // Wait before retrying (exponential backoff)
+      const waitTime = Math.min(1000 * Math.pow(2, attempt), 10000); // Max 10 seconds
+      console.log(`Waiting ${waitTime}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+}
+
 // ---------- CHAT TOGGLE ----------
 function toggleChat() {
   const widget = document.getElementById("chat-widget");
@@ -37,7 +59,7 @@ async function askBot() {
   responseEl.innerText = "Thinking...";
 
   try {
-    const response = await fetch(`${BACKEND_URL}/chat`, {
+    const response = await fetchWithRetry(`${BACKEND_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -48,7 +70,7 @@ async function askBot() {
 If anyone asks something unrelated to Dhimitri, politely say you only answer questions about him. 
 If they ask how this chatbot works, describe the technical setup.
 
-Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024 (GPA 3.7, Dean’s List 2023–2024). 
+Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024 (GPA 3.7, Dean's List 2023–2024). 
 He studied Software Engineering, Network Security, Database Design, and Data Structures.
 
 His most recent role was Technical Project Manager at Digital Design Corp:
@@ -73,13 +95,13 @@ Projects:
 Technical skills: JavaScript, Python, SQL, Java, HTML/CSS, C, C++; tools like Git, Jira, IntelliJ, Arduino, VS Code.
 
 If asked how this chatbot works:
-“This chatbot uses HTML/CSS/JS frontend (Netlify) + Node.js backend (Render) + OpenRouter API. 
-It’s part of Dhimitri’s personal portfolio website (justmicho.com). The site includes:
+"This chatbot uses HTML/CSS/JS frontend (Netlify) + Node.js backend (Render) + OpenRouter API. 
+It's part of Dhimitri's personal portfolio website (justmicho.com). The site includes:
 - Dynamic AI assistant widget
 - Supabase-powered suggestion box
 - Responsive layout and live clock
 - JavaScript game demos (Guess My Number, Pig Game, Blackjack)
-- GitHub + PDF resume integration.”`
+- GitHub + PDF resume integration."`
           },
           { role: "user", content: input },
         ],
@@ -100,7 +122,8 @@ It’s part of Dhimitri’s personal portfolio website (justmicho.com). The site
       responseEl.innerText = "Error: No response. Check backend logs.";
     }
   } catch (err) {
-    responseEl.innerText = "Error: " + err.message;
+    responseEl.innerText = "Error: " + err.message + "\n\n(The backend may be waking up. Try again in a moment.)";
+    console.error("Chat error:", err);
   }
 }
 
@@ -131,8 +154,13 @@ async function submitSuggestion() {
     return;
   }
 
+  // Show loading state
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = "Submitting...";
+  submitBtn.disabled = true;
+
   try {
-    const res = await fetch(`${BACKEND_URL}/submit-suggestion`, {
+    const res = await fetchWithRetry(`${BACKEND_URL}/submit-suggestion`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
@@ -141,11 +169,10 @@ async function submitSuggestion() {
     if (res.ok) {
       input.value = "";
       submitBtn.textContent = "Submitted!";
-      submitBtn.disabled = true;
       submitBtn.style.opacity = "0.6";
 
       setTimeout(() => {
-        submitBtn.textContent = "Submit";
+        submitBtn.textContent = originalText;
         submitBtn.disabled = false;
         submitBtn.style.opacity = "1";
       }, 5000);
@@ -153,13 +180,27 @@ async function submitSuggestion() {
       const errorText = await res.text();
       console.error("Something went wrong:", errorText);
       alert("Something went wrong. Please try again.");
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
     }
   } catch (err) {
     console.error("Error submitting suggestion:", err);
-    alert("Network error. Please try again.");
+    alert("Network error. The backend may be waking up. Please try again in a moment.");
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
   }
 }
 
+// ---------- WARM UP BACKEND ON PAGE LOAD ----------
+// Ping backend when page loads to wake it up
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.location.hostname !== "localhost") {
+    console.log("Warming up backend...");
+    fetch(`${BACKEND_URL}/`)
+      .then(() => console.log("Backend ready!"))
+      .catch(() => console.log("Backend warming up..."));
+  }
+});
 
 // http://localhost:3000/chat -->
 // https://justmicho-com.onrender.com/chat
