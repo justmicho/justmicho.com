@@ -1,29 +1,23 @@
 import express from "express";
+import cors from "cors"; 
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Node 18+ has global fetch
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
 /* -----------------------------
-   ✅ CORS: Wildcard + no credentials (Render-proof)
+   ✅ CORS: Use the cors package
 -------------------------------- */
-app.use((req, res, next) => {
-  // Allow ALL origins (safe because we do NOT use cookies/credentials)
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  // Preflight short-circuit
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+}));
 
 app.use(express.json());
 
