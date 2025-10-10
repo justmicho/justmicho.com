@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001; // <-- use 3001 locally
+const PORT = process.env.PORT || 3000; // <-- use 3000 to match frontend
 
 /* ---------- CORS ---------- */
 const PROD_ORIGINS = new Set([
