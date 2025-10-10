@@ -1,5 +1,26 @@
 # netlify.toml at repo root
+
+# --- security headers (yours) ---
 [[headers]]
   for = "/*"
   [headers.values]
   Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://localhost:3000 https://justmicho-backend.onrender.com https://api.openai.com https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+
+# --- proxy API to Render (same-origin in prod) ---
+[[redirects]]
+  from = "/chat"
+  to = "https://justmicho-backend.onrender.com/chat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/submit-suggestion"
+  to = "https://justmicho-backend.onrender.com/submit-suggestion"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ping"
+  to = "https://justmicho-backend.onrender.com/ping"
+  status = 200
+  force = true
