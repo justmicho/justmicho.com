@@ -1,248 +1,267 @@
-// ---------- API BASE (local vs production) ----------
-// In prod we use same-origin ('') so CSP connect-src 'self' is happy
-const isLocal =
-  location.hostname === "localhost" ||
-  location.hostname.startsWith("127.") ||
-  location.hostname.startsWith("10.") ||
-  location.hostname.startsWith("192.168.");
+// ============================================
+// CONFIGURATION
+// ============================================
 
-const API_BASE = isLocal ? "http://localhost:3000" : ""; // '' => /chat, /submit-suggestion, /ping
+// API Base URL - Update this to match your backend
+const API_BASE = window.location.origin; // Uses current domain
+// Or set explicitly: const API_BASE = 'https://your-backend-url.com';
 
-// ---------- RETRY FETCH UTILITY ----------
-async function fetchWithRetry(url, options, maxRetries = 3) {
-  let lastErr;
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const res = await fetch(url, options);
-      return res;
-    } catch (err) {
-      lastErr = err;
-      const wait = Math.min(1000 * 2 ** attempt, 10000);
-      // Avoid inline styles/log formatting for CSP strictness
-      console.log(
-        `Attempt ${attempt + 1} failed: ${err?.message || err}. Retrying in ${wait}ms...`
-      );
-      await new Promise((r) => setTimeout(r, wait));
+// ============================================
+// EVENT LISTENERS - Add at the top
+// ============================================
+
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  
+  // Modal functionality
+  const openModalBtn = document.getElementById('openModalBtn');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const projectModal = document.getElementById('projectModal');
+  
+  if (openModalBtn) {
+    openModalBtn.addEventListener('click', openModal);
+  }
+  
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', closeModal);
+  }
+  
+  // Close modal when clicking outside of it
+  window.addEventListener('click', function(event) {
+    if (event.target === projectModal) {
+      closeModal();
     }
-  }
-  throw lastErr || new Error(`Failed after ${maxRetries} attempts`);
-}
-
-// ---------- CHAT TOGGLE (if used somewhere else in your UI) ----------
-function toggleChat() {
-  const widget = document.getElementById("chat-widget");
-  if (!widget) return;
-  widget.style.display = widget.style.display === "none" ? "block" : "none";
-}
-
-// ---------- PREFILL CHAT ----------
-function setPrompt(text) {
-  const inputEl = document.getElementById("prompt");
-  if (!inputEl) return;
-  inputEl.value = text;
-  askBot();
-}
-
-// ---------- CLOCK DISPLAY ----------
-function updateTime() {
-  const now = new Date();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  const yyyy = now.getFullYear();
-  const hh = String(now.getHours()).padStart(2, "0");
-  const min = String(now.getMinutes()).padStart(2, "0");
-  const ss = String(now.getSeconds()).padStart(2, "0");
-  const ts = document.getElementById("timestamp");
-  if (ts) ts.innerText = `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
-}
-
-// ---------- CHATBOT FUNCTION ----------
-async function askBot() {
-  const inputEl = document.getElementById("prompt");
-  const responseEl = document.getElementById("response");
-  if (!inputEl || !responseEl) return;
-
-  const input = inputEl.value;
-  responseEl.innerText = "Thinking...";
-
-  try {
-    const response = await fetchWithRetry(`${API_BASE}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "system",
-            content: `You are an AI chatbot that knows Dhimitri Dinella very well. 
-If anyone asks something unrelated to Dhimitri, politely say you only answer questions about him. 
-If they ask how this chatbot works, describe the technical setup.
-
-Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024 (GPA 3.7, Dean's List 2023–2024). 
-He studied Software Engineering, Network Security, Database Design, and Data Structures.
-
-His most recent role was Technical Project Manager at Digital Design Corp:
-- Led cross-functional work between product, R&D, finance, and engineering teams.
-- Automated Product Introduction and RMA processes (saving 20–30 minutes per task).
-- Built Trac automation scripts in Python (requests, BeautifulSoup, openpyxl).
-- Managed hardware + SaaS project milestones and reporting.
-- Documented workflows and standardized wiki templates for future teams.
-
-Before that, he interned at iCodice LLC as a Project Manager:
-- Delivered 5+ web interfaces on time.
-- Solved major crash bugs across two dev cycles.
-- Maintained strong communication with clients (95% satisfaction).
-
-Projects:
-- Hospital Management Database (SQL/ER for 200+ patients)
-- Chicago Lobbyist Database App (Python + SQLite + Matplotlib)
-- Blackjack (JS/HTML/CSS, in progress)
-- Pig Game (JS/HTML/CSS)
-- Guess My Number (JS/HTML/CSS)
-
-Technical skills: JavaScript, Python, SQL, Java, HTML/CSS, C, C++; tools like Git, Jira, IntelliJ, Arduino, VS Code.
-
-If asked how this chatbot works:
-"This chatbot uses HTML/CSS/JS frontend (Netlify) + Node.js backend (Render) + OpenAI API via your backend.
-It's part of Dhimitri's personal portfolio website (justmicho.com). The site includes:
-- Dynamic AI assistant widget
-- Supabase-powered suggestion box
-- Responsive layout and live clock
-- JavaScript game demos (Guess My Number, Pig Game, Blackjack)
-- GitHub + PDF resume integration."`
-          },
-          { role: "user", content: input }
-        ]
-      })
-    });
-
-    const data = await response.json();
-    if (data?.choices?.length) {
-      // Safe HTML injection (content comes from your backend/OpenAI—assumed sanitized/markdown-ish)
-      responseEl.innerHTML = `
-        ${data.choices[0].message.content}
-        <br>
-        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" class="resume-link" target="_blank" rel="noopener noreferrer">
-          👉 Resume 👈
-        </a>`;
-    } else {
-      responseEl.innerText = "Error: No response. Check backend logs.";
-    }
-  } catch (err) {
-    responseEl.innerText = "Error: " + (err?.message || String(err));
-    console.error("Chat error:", err);
-  }
-}
-
-// ---------- PROJECT MODAL ----------
-function openModal() {
-  const modal = document.getElementById("projectModal");
-  if (modal) modal.style.display = "block";
-}
-function closeModal() {
-  const modal = document.getElementById("projectModal");
-  if (modal) modal.style.display = "none";
-}
-
-// ---------- SUGGESTION SUBMISSION ----------
-async function submitSuggestion() {
-  const input = document.getElementById("suggestion");
-  const submitBtn = document.getElementById("submit-btn");
-  if (!input || !submitBtn) return;
-
-  const message = input.value.trim();
-  if (!message) {
-    // Using alert is fine; it’s not CSP-related
-    alert("Please enter a suggestion.");
-    return;
-  }
-
-  const originalText = submitBtn.textContent;
-  submitBtn.textContent = "Submitting...";
-  submitBtn.disabled = true;
-
-  try {
-    const res = await fetchWithRetry(`${API_BASE}/submit-suggestion`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    if (res.ok) {
-      input.value = "";
-      submitBtn.textContent = "Submitted!";
-      submitBtn.style.opacity = "0.6";
-      setTimeout(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = "1";
-      }, 5000);
-    } else {
-      console.error("Suggestion failed:", await res.text());
-      alert("Something went wrong. Please try again.");
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    }
-  } catch (err) {
-    console.error("Suggestion error:", err);
-    alert("Network error. Please try again.");
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
-  }
-}
-
-// ---------- BINDINGS (no inline handlers) ----------
-document.addEventListener("DOMContentLoaded", () => {
-  // Warm up backend
-  fetch(`${API_BASE}/ping`, { method: "GET" })
-    .then((r) => {
-      if (!r.ok) throw new Error(`/ping returned ${r.status}`);
-      console.log("Backend ready!");
-    })
-    .catch(() => console.log("Backend warming up..."));
-
-  // Clock
-  updateTime();
-  setInterval(updateTime, 1000);
-
-  // Buttons (no inline)
-  const askBtn = document.querySelector("[data-action='ask-bot']");
-  if (askBtn) askBtn.addEventListener("click", askBot);
-
-  const openModalBtn = document.querySelector("[data-action='open-modal']");
-  if (openModalBtn) openModalBtn.addEventListener("click", openModal);
-
-  const closeModalBtn = document.querySelector("[data-action='close-modal']");
-  if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
-
-  const submitSuggestionBtn = document.querySelector(
-    "[data-action='submit-suggestion']"
-  );
-  if (submitSuggestionBtn)
-    submitSuggestionBtn.addEventListener("click", submitSuggestion);
-
-  // Suggestion chips
-  document.querySelectorAll(".suggestions [data-prompt]").forEach((li) => {
-    li.addEventListener("click", () => {
-      const text = li.getAttribute("data-prompt");
-      setPrompt(text || "");
-    });
   });
 
-  // Enter to submit in the search input
-  const promptInput = document.getElementById("prompt");
+  // Search functionality
+  const searchBtn = document.getElementById('searchBtn');
+  const promptInput = document.getElementById('prompt');
+  
+  if (searchBtn) {
+    searchBtn.addEventListener('click', askBot);
+  }
+  
   if (promptInput) {
-    promptInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
+    promptInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
         askBot();
       }
     });
   }
 
-  // Close modal when clicking outside
-  window.addEventListener("click", (event) => {
-    const modal = document.getElementById("projectModal");
-    if (!modal) return;
-    if (event.target === modal) closeModal();
+  // Suggestion functionality
+  const submitBtn = document.getElementById('submit-btn');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', submitSuggestion);
+  }
+
+  // Suggestion list items
+  const suggestionItems = document.querySelectorAll('.suggestions li');
+  suggestionItems.forEach(function(li) {
+    li.addEventListener('click', function() {
+      const promptText = this.getAttribute('data-prompt');
+      if (promptInput) {
+        promptInput.value = promptText;
+        askBot();
+      }
+    });
   });
+
+  // Initialize timestamp
+  updateTimestamp();
+  setInterval(updateTimestamp, 1000);
 });
+
+// ============================================
+// MODAL FUNCTIONS
+// ============================================
+
+function openModal() {
+  const modal = document.getElementById('projectModal');
+  if (modal) {
+    modal.style.display = 'block';
+  }
+}
+
+function closeModal() {
+  const modal = document.getElementById('projectModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+// ============================================
+// CHATBOT FUNCTIONS
+// ============================================
+
+async function askBot() {
+  const promptInput = document.getElementById('prompt');
+  const responseBox = document.getElementById('response');
+  const prompt = promptInput.value.trim();
+
+  if (!prompt) {
+    responseBox.textContent = 'Please enter a question!';
+    return;
+  }
+
+  responseBox.textContent = 'Thinking...';
+
+  try {
+    const response = await fetch(`${API_BASE}/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt: prompt }),
+    });
+
+    // Check if response is OK
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status} ${response.statusText}`);
+    }
+
+    // Check if response has content
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server did not return JSON response');
+    }
+
+    const text = await response.text();
+    
+    // Check if response is empty
+    if (!text || text.trim() === '') {
+      throw new Error('Server returned empty response');
+    }
+
+    // Try to parse JSON
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Response text:', text);
+      throw new Error('Invalid JSON response from server');
+    }
+
+    responseBox.textContent = data.response || data.message || 'No response received.';
+    
+  } catch (error) {
+    console.error('Chat error:', error);
+    
+    // User-friendly error messages
+    if (error.message.includes('404')) {
+      responseBox.textContent = '⚠️ Backend not available. Please check if your server is running.';
+    } else if (error.message.includes('Failed to fetch')) {
+      responseBox.textContent = '⚠️ Cannot connect to server. Please check your internet connection.';
+    } else if (error.message.includes('JSON')) {
+      responseBox.textContent = '⚠️ Server returned invalid data. Please try again.';
+    } else {
+      responseBox.textContent = `⚠️ Error: ${error.message}`;
+    }
+  }
+}
+
+// ============================================
+// SUGGESTION FUNCTIONS
+// ============================================
+
+async function submitSuggestion() {
+  const suggestionTextarea = document.getElementById('suggestion');
+  const submitBtn = document.getElementById('submit-btn');
+  const suggestion = suggestionTextarea.value.trim();
+
+  if (!suggestion) {
+    alert('Please enter a suggestion!');
+    return;
+  }
+
+  // Disable button and show loading state
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+
+  try {
+    const response = await fetch(`${API_BASE}/suggestion`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ suggestion: suggestion }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    // Check for empty response
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+      // If empty but status is OK, treat as success
+      alert('Thank you for your suggestion!');
+      suggestionTextarea.value = '';
+      return;
+    }
+
+    const data = JSON.parse(text);
+    alert(data.message || 'Thank you for your suggestion!');
+    suggestionTextarea.value = '';
+    
+  } catch (error) {
+    console.error('Suggestion error:', error);
+    
+    if (error.message.includes('404')) {
+      alert('⚠️ Suggestion endpoint not available. Your feedback has been logged locally.');
+      // Optional: Save to localStorage as backup
+      saveSuggestionLocally(suggestion);
+      suggestionTextarea.value = '';
+    } else {
+      alert(`⚠️ Error submitting suggestion: ${error.message}`);
+    }
+  } finally {
+    // Re-enable button
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit';
+  }
+}
+
+// Backup: Save suggestions locally if server is unavailable
+function saveSuggestionLocally(suggestion) {
+  try {
+    const suggestions = JSON.parse(localStorage.getItem('suggestions') || '[]');
+    suggestions.push({
+      text: suggestion,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('suggestions', JSON.stringify(suggestions));
+    console.log('Suggestion saved locally:', suggestion);
+  } catch (e) {
+    console.error('Could not save suggestion locally:', e);
+  }
+}
+
+// ============================================
+// TIMESTAMP FUNCTION
+// ============================================
+
+function updateTimestamp() {
+  const timestampDiv = document.getElementById('timestamp');
+  if (timestampDiv) {
+    const now = new Date();
+    const options = { 
+      month: '2-digit', 
+      day: '2-digit', 
+      year: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: false
+    };
+    timestampDiv.textContent = now.toLocaleString('en-US', options).replace(',', '');
+  }
+}
+
+// ============================================
+// INITIALIZATION LOG
+// ============================================
+
+console.log('Backend warming up...');
+console.log('API_BASE:', API_BASE);
