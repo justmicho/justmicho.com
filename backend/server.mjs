@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors"; 
+import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -10,14 +10,20 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 
 /* -----------------------------
-   ✅ CORS: Use the cors package
+   ✅ CORS: Enhanced Configuration
 -------------------------------- */
+// Use cors package with explicit configuration
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: false,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Additional safety net - explicit OPTIONS handler for all routes
+app.options('*', cors());
 
 app.use(express.json());
 
