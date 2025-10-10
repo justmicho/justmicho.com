@@ -13,6 +13,7 @@ app.use(express.json());
 
 // Health check (optional but nice on Render)
 app.get("/", (_req, res) => res.send("OK"));
+app.get("/ping", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 // Chat endpoint (OpenAI example; swap to OpenRouter if you prefer)
 app.post("/chat", async (req, res) => {

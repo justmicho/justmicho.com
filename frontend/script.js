@@ -1,12 +1,17 @@
 // ---------- API BASE (local vs production) ----------
-// In prod we use same-origin ('') so CSP connect-src 'self' is happy
+// In prod we call Render directly; in dev we hit your local server.
 const isLocal =
   location.hostname === "localhost" ||
   location.hostname.startsWith("127.") ||
   location.hostname.startsWith("10.") ||
   location.hostname.startsWith("192.168.");
 
-const API_BASE = isLocal ? "http://localhost:3000" : ""; // '' => /chat, /submit-suggestion, /ping
+const API_BASE = isLocal
+  ? "http://localhost:3000"
+  : "https://justmicho-backend.onrender.com";
+
+window.API_BASE = API_BASE; // for console debugging
+console.log("API_BASE", API_BASE);
 
 // ---------- RETRY FETCH UTILITY ----------
 async function fetchWithRetry(url, options, maxRetries = 3) {
@@ -18,7 +23,6 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
     } catch (err) {
       lastErr = err;
       const wait = Math.min(1000 * 2 ** attempt, 10000);
-      // Avoid inline styles/log formatting for CSP strictness
       console.log(
         `Attempt ${attempt + 1} failed: ${err?.message || err}. Retrying in ${wait}ms...`
       );
@@ -115,9 +119,26 @@ It's part of Dhimitri's personal portfolio website (justmicho.com). The site inc
       })
     });
 
+    // Defensive parsing for clearer errors
+    const ct = (response.headers.get("content-type") || "").toLowerCase();
+    if (!ct.includes("application/json")) {
+      const text = await response.text();
+      throw new Error(
+        `Expected JSON, got ${response.status} ${response.statusText} (${ct}). Body: ${text.slice(0, 300)}`
+      );
+    }
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        `Backend error ${response.status}: ${
+          (data && (data.error || data.message)) ||
+          JSON.stringify(data).slice(0, 200)
+        }`
+      );
+    }
+
     if (data?.choices?.length) {
-      // Safe HTML injection (content comes from your backend/OpenAI—assumed sanitized/markdown-ish)
       responseEl.innerHTML = `
         ${data.choices[0].message.content}
         <br>
@@ -151,7 +172,6 @@ async function submitSuggestion() {
 
   const message = input.value.trim();
   if (!message) {
-    // Using alert is fine; it’s not CSP-related
     alert("Please enter a suggestion.");
     return;
   }
@@ -166,6 +186,13 @@ async function submitSuggestion() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message })
     });
+
+    // Optional: defensive parse (uncomment if you want to inspect bad bodies)
+    // const ct = (res.headers.get("content-type") || "").toLowerCase();
+    // if (!ct.includes("application/json")) {
+    //   const t = await res.text();
+    //   throw new Error(`Expected JSON, got ${res.status} ${res.statusText} (${ct}). Body: ${t.slice(0,300)}`);
+    // }
 
     if (res.ok) {
       input.value = "";
