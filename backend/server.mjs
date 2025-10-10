@@ -15,6 +15,8 @@ const PROD_ORIGINS = new Set([
 
 const corsMw = cors({
   origin(origin, cb) {
+    console.log(`CORS check for origin: ${origin}`); // Debug logging
+
     // Allow non-browser clients
     if (!origin) return cb(null, true);
 
@@ -24,8 +26,11 @@ const corsMw = cors({
       origin.startsWith("http://127.0.0.1:");
 
     if (isLocalhost || PROD_ORIGINS.has(origin)) {
+      console.log(`CORS: Allowing origin ${origin}`);
       return cb(null, true);
     }
+
+    console.log(`CORS: Rejecting origin ${origin}`);
     return cb(new Error(`CORS: Origin ${origin} not allowed`));
   },
   methods: ["GET", "POST", "OPTIONS"],
@@ -36,6 +41,14 @@ const corsMw = cors({
 
 app.use(corsMw);
 app.use(express.json());
+
+// Fallback CORS headers for debugging
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
 /* ---------- Health ---------- */
 app.get("/", (_req, res) => res.send("OK"));
