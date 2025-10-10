@@ -1,124 +1,211 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+// ---------- AUTO BACKEND SWITCH ----------
+// Check if running locally (localhost OR local network IP)
+const isLocal = 
+  window.location.hostname === "localhost" || 
+  window.location.hostname.startsWith("127.") ||
+  window.location.hostname.startsWith("10.") ||
+  window.location.hostname.startsWith("192.168.");
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, ".env") });
+const BACKEND_URL = isLocal
+  ? "http://localhost:3000"
+  : "https://justmicho-backend.onrender.com";
 
-const app = express();
-
-/* -----------------------------
-   ✅ CORS: Multi-layer approach
--------------------------------- */
-// Layer 1: Manual CORS middleware (runs first)
-app.use((req, res, next) => {
-  console.log(`📨 ${req.method} ${req.path} from ${req.get('origin') || 'no origin'}`);
-  
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  res.header("Access-Control-Max-Age", "86400"); // 24 hours
-  
-  // Handle preflight
-  if (req.method === "OPTIONS") {
-    console.log("✅ Preflight request handled");
-    return res.status(204).end();
+// ---------- RETRY FETCH UTILITY ----------
+async function fetchWithRetry(url, options, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      return response;
+    } catch (error) {
+      console.log(`Attempt ${attempt + 1} failed:`, error.message);
+      
+      // If this is the last attempt, throw the error
+      if (attempt === maxRetries - 1) {
+        throw new Error(`Failed after ${maxRetries} attempts. Backend might be cold-starting.`);
+      }
+      
+      // Wait before retrying (longer waits for ChatGPT cold starts)
+      const waitTime = Math.min(3000 * Math.pow(2, attempt), 20000); // Max 20 seconds
+      console.log(`Waiting ${waitTime}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
   }
+}
+
+// ---------- CHAT TOGGLE ----------
+function toggleChat() {
+  const widget = document.getElementById("chat-widget");
+  widget.style.display = widget.style.display === "none" ? "block" : "none";
+}
+
+// ---------- PREFILL CHAT ----------
+function setPrompt(text) {
+  document.getElementById("prompt").value = text;
+  askBot();
+}
+
+// ---------- CLOCK DISPLAY ----------
+function updateTime() {
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const yyyy = now.getFullYear();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+  document.getElementById("timestamp").innerText = `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+// ---------- CHATBOT FUNCTION ----------
+async function askBot() {
+  const input = document.getElementById("prompt").value;
+  const responseEl = document.getElementById("response");
   
-  next();
-});
-
-// Layer 2: cors package as backup
-app.use(cors({
-  origin: '*',
-  credentials: false
-}));
-
-app.use(express.json());
-
-/* -----------------------------
-   💬 Chat Endpoint (OpenAI GPT-4o-mini)
--------------------------------- */
-app.post("/chat", async (req, res) => {
-  console.log("💬 Chat endpoint hit");
-  const messages = req.body.messages;
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: "Messages array is required" });
-  }
+  // Show more patient loading message for cold starts
+  responseEl.innerText = "Thinking... (this may take a moment if the server is waking up)";
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetchWithRetry(`${BACKEND_URL}/chat`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages,
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI chatbot that knows Dhimitri Dinella very well. 
+If anyone asks something unrelated to Dhimitri, politely say you only answer questions about him. 
+If they ask how this chatbot works, describe the technical setup.
+
+Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024 (GPA 3.7, Dean's List 2023–2024). 
+He studied Software Engineering, Network Security, Database Design, and Data Structures.
+
+His most recent role was Technical Project Manager at Digital Design Corp:
+- Led cross-functional work between product, R&D, finance, and engineering teams.
+- Automated Product Introduction and RMA processes (saving 20–30 minutes per task).
+- Built Trac automation scripts in Python (requests, BeautifulSoup, openpyxl).
+- Managed hardware + SaaS project milestones and reporting.
+- Documented workflows and standardized wiki templates for future teams.
+
+Before that, he interned at iCodice LLC as a Project Manager:
+- Delivered 5+ web interfaces on time.
+- Solved major crash bugs across two dev cycles.
+- Maintained strong communication with clients (95% satisfaction).
+
+Projects:
+- Hospital Management Database (SQL/ER for 200+ patients)
+- Chicago Lobbyist Database App (Python + SQLite + Matplotlib)
+- Blackjack (JS/HTML/CSS, in progress)
+- Pig Game (JS/HTML/CSS)
+- Guess My Number (JS/HTML/CSS)
+
+Technical skills: JavaScript, Python, SQL, Java, HTML/CSS, C, C++; tools like Git, Jira, IntelliJ, Arduino, VS Code.
+
+If asked how this chatbot works:
+"This chatbot uses HTML/CSS/JS frontend (Netlify) + Node.js backend (Render) + OpenRouter API. 
+It's part of Dhimitri's personal portfolio website (justmicho.com). The site includes:
+- Dynamic AI assistant widget
+- Supabase-powered suggestion box
+- Responsive layout and live clock
+- JavaScript game demos (Guess My Number, Pig Game, Blackjack)
+- GitHub + PDF resume integration."`
+          },
+          { role: "user", content: input },
+        ],
       }),
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      console.error("❌ OpenAI error:", data);
-      return res.status(response.status).json({ error: data });
+    if (data.choices && data.choices.length > 0) {
+      responseEl.innerHTML = `
+        ${data.choices[0].message.content}
+        <br>
+        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" 
+           class="resume-link" target="_blank">
+          👉 Resume 👈
+        </a>
+      `;
+    } else {
+      responseEl.innerText = "Error: No response. Check backend logs.";
     }
-
-    res.json(data);
   } catch (err) {
-    console.error("⚠️ Server error:", err);
-    res.status(500).json({ error: "Server error" });
+    responseEl.innerText = "Error: " + err.message + "\n\n(The backend may be waking up. Try again in a moment.)";
+    console.error("Chat error:", err);
   }
-});
+}
 
-/* -----------------------------
-   💡 Suggestion Submission (Supabase)
--------------------------------- */
-app.post("/submit-suggestion", async (req, res) => {
-  const { message } = req.body;
-  if (!message) return res.status(400).json({ error: "Message is required" });
+// ---------- PROJECT MODAL ----------
+function openModal() {
+  document.getElementById("projectModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("projectModal").style.display = "none";
+}
+
+window.onclick = function (event) {
+  const modal = document.getElementById("projectModal");
+  if (event.target === modal) {
+    closeModal();
+  }
+};
+
+// ---------- SUGGESTION SUBMISSION ----------
+async function submitSuggestion() {
+  const input = document.getElementById("suggestion");
+  const message = input.value.trim();
+  const submitBtn = document.getElementById("submit-btn");
+
+  if (!message) {
+    alert("Please enter a suggestion.");
+    return;
+  }
+
+  // Show loading state
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = "Submitting...";
+  submitBtn.disabled = true;
 
   try {
-    const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/suggestions`, {
+    const res = await fetchWithRetry(`${BACKEND_URL}/submit-suggestion`, {
       method: "POST",
-      headers: {
-        apikey: process.env.SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
     });
 
-    if (response.ok) {
-      return res.status(200).json({ success: true });
+    if (res.ok) {
+      input.value = "";
+      submitBtn.textContent = "Submitted!";
+      submitBtn.style.opacity = "0.6";
+
+      setTimeout(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+      }, 5000);
     } else {
-      const errorText = await response.text();
-      console.error("🧱 Supabase error:", errorText);
-      return res.status(500).json({ error: errorText });
+      const errorText = await res.text();
+      console.error("Something went wrong:", errorText);
+      alert("Something went wrong. Please try again.");
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
     }
   } catch (err) {
-    console.error("⚠️ Server error:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Error submitting suggestion:", err);
+    alert("Network error. The backend may be waking up. Please try again in a moment.");
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
   }
-});
+}
 
-/* -----------------------------
-   🩵 Health Check
--------------------------------- */
-app.get("/", (_req, res) => {
-  res.send("✅ justmicho-backend is live and CORS-* ready!");
-});
-
-/* -----------------------------
-   🚀 Start Server
--------------------------------- */
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Backend running at http://localhost:${PORT}`);
-  console.log("🔑 OpenAI Key Loaded:", !!process.env.OPENAI_API_KEY);
+// ---------- WARM UP BACKEND ON PAGE LOAD ----------
+// Ping backend when page loads to wake it up
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.location.hostname !== "localhost") {
+    console.log("Warming up backend...");
+    fetch(`${BACKEND_URL}/`)
+      .then(() => console.log("Backend ready!"))
+      .catch(() => console.log("Backend warming up..."));
+  }
 });
