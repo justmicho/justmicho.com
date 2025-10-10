@@ -1,8 +1,14 @@
 // ---------- AUTO BACKEND SWITCH ----------
-const BACKEND_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://justmicho-backend.onrender.com";
+// Check if running locally (localhost OR local network IP)
+const isLocal = 
+  window.location.hostname === "localhost" || 
+  window.location.hostname.startsWith("127.") ||
+  window.location.hostname.startsWith("10.") ||
+  window.location.hostname.startsWith("192.168.");
+
+const BACKEND_URL = isLocal
+  ? "http://localhost:3000"
+  : "https://justmicho-backend.onrender.com";
 
 // ---------- RETRY FETCH UTILITY ----------
 async function fetchWithRetry(url, options, maxRetries = 3) {
@@ -201,9 +207,3 @@ window.addEventListener('DOMContentLoaded', () => {
       .catch(() => console.log("Backend warming up..."));
   }
 });
-
-// http://localhost:3000/chat -->
-// https://justmicho-com.onrender.com/chat
-// https://justmicho.com/Dhimitri_Dinella.pdf
-// http://localhost:3000/submit-suggestion
-// https://justmicho-com.onrender.com/submit-suggestion
