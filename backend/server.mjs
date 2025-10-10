@@ -1,9 +1,6 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-// If you’re on Node 18/20+, fetch is global (no node-fetch import needed)
+
 dotenv.config();
 
 const app = express();
@@ -14,25 +11,21 @@ const app = express();
 const ALLOW_LIST = new Set([
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  "http://localhost",            // some dev servers show just “localhost”
+  "http://localhost",
   "https://justmicho.com",
   "https://www.justmicho.com",
 ]);
 
 function setCorsHeaders(req, res) {
   const origin = req.headers.origin || "";
-  // If the request has an Origin, reflect it back *only* if whitelisted
   if (ALLOW_LIST.has(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin"); // make caches aware CORS varies by Origin
-    // Only set credentials if you actually need cookies/auth:
-    // res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Vary", "Origin");
+    // res.setHeader("Access-Control-Allow-Credentials", "true"); // only if needed
   } else {
-    // Fallback (optional). If you prefer to reject unknown origins, omit this.
     res.setHeader("Access-Control-Allow-Origin", "https://www.justmicho.com");
     res.setHeader("Vary", "Origin");
   }
-
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader(
     "Access-Control-Allow-Headers",
@@ -41,11 +34,10 @@ function setCorsHeaders(req, res) {
   res.setHeader("Access-Control-Max-Age", "86400");
 }
 
-// CORS for every request
+// CORS for every request + handle preflight
 app.use((req, res, next) => {
   setCorsHeaders(req, res);
   if (req.method === "OPTIONS") {
-    // Important: immediately answer preflight
     return res.status(204).end();
   }
   next();
@@ -81,7 +73,6 @@ app.post("/chat", async (req, res) => {
       return res.status(response.status).json({ error: data });
     }
 
-    // Set CORS headers again on the actual response (some proxies strip)
     setCorsHeaders(req, res);
     res.json(data);
   } catch (err) {
@@ -123,24 +114,17 @@ app.post("/submit-suggestion", async (req, res) => {
 });
 
 /* -----------------------------
-   Health checks
+   Health check
 -------------------------------- */
 app.get("/", (req, res) => {
   setCorsHeaders(req, res);
   res.send("✅ justmicho-backend is live and sending proper CORS headers.");
 });
 
-// Explicit OPTIONS for good measure (some hosts route differently)
-app.options("*", (req, res) => {
-  setCorsHeaders(req, res);
-  res.status(204).end();
-});
-
 /* -----------------------------
    Start server
 -------------------------------- */
 const PORT = process.env.PORT || 3000;
-// bind 0.0.0.0 for Render
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Backend listening on http://0.0.0.0:${PORT}`);
 });
