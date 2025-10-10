@@ -1,35 +1,28 @@
-// ---------- AUTO BACKEND SWITCH ----------
-// Check if running locally (localhost OR local network IP)
-const isLocal = 
-  window.location.hostname === "localhost" || 
-  window.location.hostname.startsWith("127.") ||
-  window.location.hostname.startsWith("10.") ||
-  window.location.hostname.startsWith("192.168.");
+// ---------- API BASE (local vs production) ----------
+// In prod we use same-origin ('') so CSP connect-src 'self' is happy
+const isLocal =
+  location.hostname === "localhost" ||
+  location.hostname.startsWith("127.") ||
+  location.hostname.startsWith("10.") ||
+  location.hostname.startsWith("192.168.");
 
-const BACKEND_URL = isLocal
-  ? "http://localhost:3000"
-  : "https://justmicho-backend.onrender.com";
+const API_BASE = isLocal ? "http://localhost:3000" : ""; // '' => /chat, /submit-suggestion, /ping
 
 // ---------- RETRY FETCH UTILITY ----------
 async function fetchWithRetry(url, options, maxRetries = 3) {
+  let lastErr;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const response = await fetch(url, options);
-      return response;
-    } catch (error) {
-      console.log(`Attempt ${attempt + 1} failed:`, error.message);
-      
-      // If this is the last attempt, throw the error
-      if (attempt === maxRetries - 1) {
-        throw new Error(`Failed after ${maxRetries} attempts. Backend might be cold-starting.`);
-      }
-      
-      // Wait before retrying (exponential backoff)
-      const waitTime = Math.min(1000 * Math.pow(2, attempt), 10000); // Max 10 seconds
-      console.log(`Waiting ${waitTime}ms before retry...`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      const res = await fetch(url, options);
+      return res;
+    } catch (err) {
+      lastErr = err;
+      const wait = Math.min(1000 * 2 ** attempt, 10000);
+      console.log(`Attempt ${attempt + 1} failed: ${err?.message || err}. Retrying in ${wait}ms...`);
+      await new Promise(r => setTimeout(r, wait));
     }
   }
+  throw lastErr || new Error(`Failed after ${maxRetries} attempts`);
 }
 
 // ---------- CHAT TOGGLE ----------
@@ -65,7 +58,7 @@ async function askBot() {
   responseEl.innerText = "Thinking...";
 
   try {
-    const response = await fetchWithRetry(`${BACKEND_URL}/chat`, {
+    const response = await fetchWithRetry(`${API_BASE}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -101,7 +94,7 @@ Projects:
 Technical skills: JavaScript, Python, SQL, Java, HTML/CSS, C, C++; tools like Git, Jira, IntelliJ, Arduino, VS Code.
 
 If asked how this chatbot works:
-"This chatbot uses HTML/CSS/JS frontend (Netlify) + Node.js backend (Render) + OpenRouter API. 
+"This chatbot uses HTML/CSS/JS frontend (Netlify) + Node.js backend (Render) + OpenAI API via your backend.
 It's part of Dhimitri's personal portfolio website (justmicho.com). The site includes:
 - Dynamic AI assistant widget
 - Supabase-powered suggestion box
@@ -109,26 +102,24 @@ It's part of Dhimitri's personal portfolio website (justmicho.com). The site inc
 - JavaScript game demos (Guess My Number, Pig Game, Blackjack)
 - GitHub + PDF resume integration."`
           },
-          { role: "user", content: input },
-        ],
-      }),
+          { role: "user", content: input }
+        ]
+      })
     });
 
     const data = await response.json();
-    if (data.choices && data.choices.length > 0) {
-      responseEl.innerHTML = `
+    if (data?.choices?.length) {
+      document.getElementById("response").innerHTML = `
         ${data.choices[0].message.content}
         <br>
-        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" 
-           class="resume-link" target="_blank">
+        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" class="resume-link" target="_blank">
           👉 Resume 👈
-        </a>
-      `;
+        </a>`;
     } else {
       responseEl.innerText = "Error: No response. Check backend logs.";
     }
   } catch (err) {
-    responseEl.innerText = "Error: " + err.message + "\n\n(The backend may be waking up. Try again in a moment.)";
+    responseEl.innerText = "Error: " + err.message;
     console.error("Chat error:", err);
   }
 }
@@ -137,16 +128,12 @@ It's part of Dhimitri's personal portfolio website (justmicho.com). The site inc
 function openModal() {
   document.getElementById("projectModal").style.display = "block";
 }
-
 function closeModal() {
   document.getElementById("projectModal").style.display = "none";
 }
-
 window.onclick = function (event) {
   const modal = document.getElementById("projectModal");
-  if (event.target === modal) {
-    closeModal();
-  }
+  if (event.target === modal) closeModal();
 };
 
 // ---------- SUGGESTION SUBMISSION ----------
@@ -154,56 +141,46 @@ async function submitSuggestion() {
   const input = document.getElementById("suggestion");
   const message = input.value.trim();
   const submitBtn = document.getElementById("submit-btn");
+  if (!message) return alert("Please enter a suggestion.");
 
-  if (!message) {
-    alert("Please enter a suggestion.");
-    return;
-  }
-
-  // Show loading state
   const originalText = submitBtn.textContent;
   submitBtn.textContent = "Submitting...";
   submitBtn.disabled = true;
 
   try {
-    const res = await fetchWithRetry(`${BACKEND_URL}/submit-suggestion`, {
+    const res = await fetchWithRetry(`${API_BASE}/submit-suggestion`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message })
     });
 
     if (res.ok) {
       input.value = "";
       submitBtn.textContent = "Submitted!";
       submitBtn.style.opacity = "0.6";
-
       setTimeout(() => {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
         submitBtn.style.opacity = "1";
       }, 5000);
     } else {
-      const errorText = await res.text();
-      console.error("Something went wrong:", errorText);
+      console.error("Suggestion failed:", await res.text());
       alert("Something went wrong. Please try again.");
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
     }
   } catch (err) {
-    console.error("Error submitting suggestion:", err);
-    alert("Network error. The backend may be waking up. Please try again in a moment.");
+    console.error("Suggestion error:", err);
+    alert("Network error. Please try again.");
     submitBtn.textContent = originalText;
     submitBtn.disabled = false;
   }
 }
 
 // ---------- WARM UP BACKEND ON PAGE LOAD ----------
-// Ping backend when page loads to wake it up
-window.addEventListener('DOMContentLoaded', () => {
-  if (window.location.hostname !== "localhost") {
-    console.log("Warming up backend...");
-    fetch(`${BACKEND_URL}/`)
-      .then(() => console.log("Backend ready!"))
-      .catch(() => console.log("Backend warming up..."));
-  }
+// Ping /ping (proxied by Netlify) to wake Render
+window.addEventListener("DOMContentLoaded", () => {
+  fetch(`${API_BASE}/ping`, { method: "GET" })
+    .then(() => console.log("Backend ready!"))
+    .catch(() => console.log("Backend warming up..."));
 });
