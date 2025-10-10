@@ -42,7 +42,9 @@
         <a href="apijoke.webp" target="_blank" class="apijoke">My API Keys</a>
 
         <!-- was: onclick="openModal()" -->
-        <button class="project-btn" type="button" data-action="open-modal">Projects</button>
+        <button class="project-btn" type="button" data-action="open-modal">
+          Projects
+        </button>
 
         <a
           href="https://www.linkedin.com/in/dhimitridinella"
@@ -98,23 +100,58 @@
     <div id="projectModal" class="modal" aria-hidden="true" role="dialog">
       <div class="modal-content">
         <!-- was: onclick="closeModal()" -->
-        <button class="close" type="button" aria-label="Close" data-action="close-modal">&times;</button>
+        <button
+          class="close"
+          type="button"
+          aria-label="Close"
+          data-action="close-modal"
+        >
+          &times;
+        </button>
         <h2>Select a Project</h2>
         <ul class="project-list">
-          <li><a href="/guessmynumber/index.html" target="_blank">Guess My Number</a></li>
+          <li>
+            <a href="/guessmynumber/index.html" target="_blank"
+              >Guess My Number</a
+            >
+          </li>
           <li><a href="/piggame/index.html" target="_blank">Pig Game</a></li>
-          <li><a href="https://github.com/justmicho/hospitalDatabase" target="_blank">Hospital Database</a></li>
-          <li><a href="https://github.com/justmicho/chicago_lobbyist" target="_blank">Chicago Lobbyist</a></li>
-          <li><a href="https://github.com/justmicho/blackjack-game" target="_blank">BlackJack Game (Coming Soon)</a></li>
+          <li>
+            <a
+              href="https://github.com/justmicho/hospitalDatabase"
+              target="_blank"
+              >Hospital Database</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/justmicho/chicago_lobbyist"
+              target="_blank"
+              >Chicago Lobbyist</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/justmicho/blackjack-game"
+              target="_blank"
+              >BlackJack Game (Coming Soon)</a
+            >
+          </li>
         </ul>
       </div>
     </div>
 
-    <div class="suggestion-box">
-      <h3 class="suggestion-header">Have a suggestion?</h3>
-      <textarea id="suggestion" placeholder="Share your thoughts..." rows="4"></textarea>
+    <div class="suggestion-box" style="display: none">
+      <h3 class="suggestion-header hi">Have a suggestion?</h3>
+      <textarea
+        id="suggestion"
+        placeholder="Share your thoughts..."
+        rows="4"
+      ></textarea>
       <!-- was: onclick="submitSuggestion()" -->
-      <button id="submit-btn" type="button" data-action="submit-suggestion">Submit</button>
+      <button id="submit-btn" type="button" data-action="submit-suggestion">
+        Submit
+      </button>
     </div>
 
     <!-- Only external script; no inline <script> tags -->
