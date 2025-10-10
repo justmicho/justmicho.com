@@ -11,19 +11,23 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 
 /* -----------------------------
-   ✅ CORS (local + production)
+   ✅ FIXED CORS (Local + Production)
 -------------------------------- */
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow local dev from any port + production domain
-      if (
-  !origin ||
-  origin.includes("localhost") ||
-  origin.includes("127.0.0.1") ||
-  origin.includes("10.0.0.") || // ✅ allow your LAN IP
-  origin === "https://www.justmicho.com"
-) {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://justmicho.com",
+        "https://www.justmicho.com",
+      ];
+
+      // Allow curl/postman (no origin)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        console.log("✅ Allowed CORS origin:", origin);
         callback(null, true);
       } else {
         console.warn("❌ Blocked by CORS:", origin);
@@ -50,11 +54,11 @@ app.post("/chat", async (req, res) => {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // ⚡ Lightweight GPT-4 model
+        model: "gpt-4o-mini", // ⚡ Fast lightweight model
         messages,
       }),
     });
@@ -66,7 +70,7 @@ app.post("/chat", async (req, res) => {
       return res.status(response.status).json({ error: data });
     }
 
-    console.log("🤖 OpenAI response:", JSON.stringify(data, null, 2));
+    console.log("🤖 OpenAI response OK");
     res.json(data);
   } catch (err) {
     console.error("⚠️ Server error:", err);
@@ -93,13 +97,16 @@ app.post("/submit-suggestion", async (req, res) => {
       body: JSON.stringify({ message }),
     });
 
-    if (response.ok) return res.status(200).json({ success: true });
-    const errorText = await response.text();
-    console.error("🧱 Supabase error:", errorText);
-    res.status(500).json({ error: errorText });
+    if (response.ok) {
+      return res.status(200).json({ success: true });
+    } else {
+      const errorText = await response.text();
+      console.error("🧱 Supabase error:", errorText);
+      return res.status(500).json({ error: errorText });
+    }
   } catch (err) {
     console.error("⚠️ Server error:", err);
-    res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
