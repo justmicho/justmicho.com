@@ -1,4 +1,3 @@
-// server.mjs
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -6,20 +5,27 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3001; // <-- use 3001 locally
 
 /* ---------- CORS ---------- */
-const ALLOWED_ORIGINS = [
+const PROD_ORIGINS = new Set([
   "https://www.justmicho.com",
   "https://justmicho.com",
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-];
+]);
 
 const corsMw = cors({
   origin(origin, cb) {
-    if (!origin) return cb(null, true);                   // allow curl/postman
-    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    // Allow non-browser clients
+    if (!origin) return cb(null, true);
+
+    // Allow any localhost / 127.* origin (any port) in dev
+    const isLocalhost =
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:");
+
+    if (isLocalhost || PROD_ORIGINS.has(origin)) {
+      return cb(null, true);
+    }
     return cb(new Error(`CORS: Origin ${origin} not allowed`));
   },
   methods: ["GET", "POST", "OPTIONS"],
@@ -31,19 +37,13 @@ const corsMw = cors({
 app.use(corsMw);
 app.use(express.json());
 
-// ✅ Express-5-safe preflight handler (no wildcard pattern)
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204); // No Content
-  }
-  next();
-});
-
 /* ---------- Health ---------- */
 app.get("/", (_req, res) => res.send("OK"));
+app.options("/ping", corsMw);
 app.get("/ping", corsMw, (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 /* ---------- Chat ---------- */
+app.options("/chat", corsMw);
 app.post("/chat", corsMw, async (req, res) => {
   try {
     const { messages } = req.body || {};
@@ -61,7 +61,9 @@ app.post("/chat", corsMw, async (req, res) => {
     });
 
     const ct = (r.headers.get("content-type") || "").toLowerCase();
-    const data = ct.includes("application/json") ? await r.json() : { error: await r.text() };
+    const data = ct.includes("application/json")
+      ? await r.json()
+      : { error: await r.text() };
 
     if (!r.ok) return res.status(r.status).json(data);
     return res.json(data);
@@ -72,6 +74,7 @@ app.post("/chat", corsMw, async (req, res) => {
 });
 
 /* ---------- Suggestions ---------- */
+app.options("/submit-suggestion", corsMw);
 app.post("/submit-suggestion", corsMw, async (req, res) => {
   try {
     const { message } = req.body || {};
@@ -96,7 +99,6 @@ app.post("/submit-suggestion", corsMw, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () =>
   console.log(`🚀 http://0.0.0.0:${PORT} - CORS open`)
 );
