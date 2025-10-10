@@ -1,0 +1,14 @@
+[build]
+  publish = "frontend"
+
+[[redirects]]
+  from = "/chat"
+  to = "https://justmicho-backend.onrender.com/chat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/submit-suggestion"
+  to = "https://justmicho-backend.onrender.com/submit-suggestion"
+  status = 200
+  force = true
