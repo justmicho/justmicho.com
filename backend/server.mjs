@@ -10,16 +10,30 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 
 /* -----------------------------
-   ✅ CORS: Enhanced Configuration
+   ✅ CORS: Multi-layer approach
 -------------------------------- */
-// Use cors package with explicit configuration
+// Layer 1: Manual CORS middleware (runs first)
+app.use((req, res, next) => {
+  console.log(`📨 ${req.method} ${req.path} from ${req.get('origin') || 'no origin'}`);
+  
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  res.header("Access-Control-Max-Age", "86400"); // 24 hours
+  
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    console.log("✅ Preflight request handled");
+    return res.status(204).end();
+  }
+  
+  next();
+});
+
+// Layer 2: cors package as backup
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: false,
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  credentials: false
 }));
 
 app.use(express.json());
@@ -28,6 +42,7 @@ app.use(express.json());
    💬 Chat Endpoint (OpenAI GPT-4o-mini)
 -------------------------------- */
 app.post("/chat", async (req, res) => {
+  console.log("💬 Chat endpoint hit");
   const messages = req.body.messages;
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: "Messages array is required" });
