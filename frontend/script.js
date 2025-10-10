@@ -13,12 +13,12 @@ function setPrompt(text) {
 // Display current date and time, updating every second
 function updateTime() {
   const now = new Date();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
   const yyyy = now.getFullYear();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const min = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
   const formatted = `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
   document.getElementById("timestamp").innerText = formatted;
 }
@@ -29,17 +29,20 @@ updateTime();
 async function askBot() {
   const input = document.getElementById("prompt").value;
   const responseEl = document.getElementById("response");
-  responseEl.innerText = "Thinking...\n Sorry for the wait, I'm the only AI bot that is free.\n I will get back to you as soon as possible.";
+  responseEl.innerText =
+    "Thinking...";
 
   try {
-    const response = await fetch("https://justmicho-com.onrender.com/chat", {
+    const response = await fetch("http://localhost:3000/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         messages: [
           {
             role: "system",
-            content: `You are an AI chatbot that knows Dhimitri Dinella very well.
+            content: `You are an AI chatbot that knows Dhimitri Dinella very well. If anyone asks a simple question not related to Dhimitri, politely inform them that you only answer questions about Dhimitri. If they ask about how this chatbot works, provide the full technical details at the end of your response.
+
+Here is some information about Dhimitri to help you answer questions:
           
           Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024. He earned a 3.7 GPA and was on the Dean’s List in 2023–2024. His coursework includes Software Engineering, Network Security, Database Design, and Data Structures.
           
@@ -48,9 +51,16 @@ async function askBot() {
           - Analyzed and resolved website crash issues across two dev cycles
           - Maintained strong communication with clients and stakeholders, achieving 95% satisfaction
           
-          Previously, he was an Assistant Property Manager at Berkshire Communities, managing over 115 units. He:
-          - Improved on-time rent payments to 98% with automation
-          - Reduced service response time by 30% with a new scheduling system
+          He also worked as a Technical Project Manager at Digital Design Corp where he:
+            Worked closely with product, engineering, R&Dand finance teams to manage hardware and SaaS product launches.
+             Spearheaded development of automation tools to streamline internal workflows across the Product Introduction and
+            RMA processes, reducing manual update time by 20–30 minutes per task.
+             Built and deployed Python-based Trac automation scripts leveraging requests, BeautifulSoup, and openpyxl to update
+            Excel milestones, post wiki entries, and import Trac tickets automatically.
+             Collaborated with engineering, finance, and product teams to automate license tracking and milestone reporting,
+            ensuring alignment across hardware and SaaS product lines.
+             Documented and standardized technical processes in Trac wiki pages, improving visibility and reducing onboarding
+            time for future project teams.
           
           Dhimitri's key projects include:
           - Hospital Management Database: Optimized SQL/ER model for 200+ patients
@@ -64,22 +74,22 @@ async function askBot() {
           If anyone asks how this chatbot works, explain:
           "This chatbot was built using HTML, CSS, and JavaScript for the frontend. It connects to a Node.js + Express backend hosted on Render and uses OpenRouter to access a GPT-like model. It’s integrated into Dhimitri’s personal site via a floating widget he designed.
 
-The website also features:
-- A custom project showcase modal built with vanilla JavaScript and CSS
-- A live clock display using the JavaScript Date API
-- A suggestion box feature powered by Supabase (PostgreSQL backend as a service)
-- Responsive layout and design using media queries
-- Custom favicon and meta settings for branding
-- A set of interactive JavaScript games (Guess My Number, Pig Game, Blackjack) styled with CSS and hosted as individual project pages
-- GitHub integration and version control
-- Deployment using Netlify for the frontend and Render for the backend
+          The website also features:
+          - A custom project showcase modal built with vanilla JavaScript and CSS
+          - A live clock display using the JavaScript Date API
+          - A suggestion box feature powered by Supabase (PostgreSQL backend as a service)
+          - Responsive layout and design using media queries
+          - Custom favicon and meta settings for branding
+          - A set of interactive JavaScript games (Guess My Number, Pig Game, Blackjack) styled with CSS and hosted as individual project pages
+          - GitHub integration and version control
+          - Deployment using Netlify for the frontend and Render for the backend
 
-This full-stack setup enables both static content and dynamic interaction through the AI assistant and live user suggestion system."
-`
+          This full-stack setup enables both static content and dynamic interaction through the AI assistant and live user suggestion system."
+`,
           },
-          { role: "user", content: input }
-        ]
-      })
+          { role: "user", content: input },
+        ],
+      }),
     });
 
     const data = await response.json();
@@ -112,7 +122,7 @@ function closeModal() {
 }
 
 // Close modal if clicked outside the modal content
-window.onclick = function(event) {
+window.onclick = function (event) {
   const modal = document.getElementById("projectModal");
   if (event.target === modal) {
     closeModal();
@@ -130,36 +140,37 @@ async function submitSuggestion() {
     return;
   }
 
-  const res = await fetch("https://justmicho-com.onrender.com/submit-suggestion", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ message })
-});
+  const res = await fetch(
+    "http://localhost:3000/submit-suggestion",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message }),
+    }
+  );
 
-if (res.ok) {
-  input.value = "";
-  submitBtn.textContent = "Submitted!";
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = "0.6";
+  if (res.ok) {
+    input.value = "";
+    submitBtn.textContent = "Submitted!";
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = "0.6";
 
-  setTimeout(() => {
-    submitBtn.textContent = "Submit";
-    submitBtn.disabled = false;
-    submitBtn.style.opacity = "1";
-  }, 5000);
-} else {
-  const errorText = await res.text();
-  console.error("Something went wrong:", errorText);
-  alert("Something went wrong. Please try again.");
+    setTimeout(() => {
+      submitBtn.textContent = "Submit";
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "1";
+    }, 5000);
+  } else {
+    const errorText = await res.text();
+    console.error("Something went wrong:", errorText);
+    alert("Something went wrong. Please try again.");
+  }
 }
-
-}
-
 
 // http://localhost:3000/chat -->
-// https://justmicho-com.onrender.com/chat 
+// https://justmicho-com.onrender.com/chat
 // https://justmicho.com/Dhimitri_Dinella.pdf
 // http://localhost:3000/submit-suggestion
 // https://justmicho-com.onrender.com/submit-suggestion
