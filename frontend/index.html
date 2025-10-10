@@ -39,8 +39,11 @@
         <h1 class="logo-text">Hello I'm Dhimitri Dinella</h1>
       </div>
       <div class="social-links">
-        <a href="Dhimitri Dinella.pdf" target="_blank" class="apijoke">Resume</a>
-        <button class="project-btn" onclick="openModal()">Projects</button>
+        <a href="apijoke.webp" target="_blank" class="apijoke">My API Keys</a>
+
+        <!-- was: onclick="openModal()" -->
+        <button class="project-btn" type="button" data-action="open-modal">Projects</button>
+
         <a
           href="https://www.linkedin.com/in/dhimitridinella"
           target="_blank"
@@ -57,26 +60,30 @@
     </div>
 
     <div id="timestamp"></div>
+
     <div class="google-style-container">
       <h1 class="logo">Welcome to my world</h1>
+
       <div class="search-box">
         <input type="text" id="prompt" placeholder="Get to know Dhimitri..." />
-        <button onclick="askBot()">🔍</button>
+        <!-- was: onclick="askBot()" -->
+        <button type="button" data-action="ask-bot">🔍</button>
       </div>
 
       <p class="try-searching"><strong>Try searching:</strong></p>
       <div class="suggestions">
         <ul>
-          <li onclick="setPrompt('What projects has Dhimitri worked on?')">
+          <!-- was: onclick="setPrompt('...')" -->
+          <li data-prompt="What projects has Dhimitri worked on?">
             What projects has Dhimitri worked on?
           </li>
-          <li onclick="setPrompt('Where did Dhimitri go to school?')">
+          <li data-prompt="Where did Dhimitri go to school?">
             Where did Dhimitri go to school?
           </li>
-          <li onclick="setPrompt('What skills does Dhimitri have?')">
+          <li data-prompt="What skills does Dhimitri have?">
             What skills does Dhimitri have?
           </li>
-          <li onclick="setPrompt('What experience does Dhimitri have?')">
+          <li data-prompt="What experience does Dhimitri have?">
             What experience does Dhimitri have?
           </li>
         </ul>
@@ -86,58 +93,31 @@
         Hello I'm Chat GPT. Ask me anything about Dhimitri!
       </div>
     </div>
-    <script>
-      function setPrompt(text) {
-        document.getElementById("prompt").value = text;
-        askBot();
-      }
-    </script>
+
     <!-- Modal -->
-    <div id="projectModal" class="modal">
+    <div id="projectModal" class="modal" aria-hidden="true" role="dialog">
       <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
+        <!-- was: onclick="closeModal()" -->
+        <button class="close" type="button" aria-label="Close" data-action="close-modal">&times;</button>
         <h2>Select a Project</h2>
         <ul class="project-list">
-          <li>
-            <a href="/guessmynumber/index.html" target="_blank"
-              >Guess My Number</a
-            >
-          </li>
+          <li><a href="/guessmynumber/index.html" target="_blank">Guess My Number</a></li>
           <li><a href="/piggame/index.html" target="_blank">Pig Game</a></li>
-          <li>
-            <a
-              href="https://github.com/justmicho/hospitalDatabase"
-              target="_blank"
-              >Hospital Database</a
-            >
-          </li>
-          <li>
-            <a
-              href="https://github.com/justmicho/chicago_lobbyist"
-              target="_blank"
-              >Chicago Lobbyist</a
-            >
-          </li>
-          <li>
-            <a
-              href="https://github.com/justmicho/blackjack-game"
-              target="_blank"
-              >BlackJack Game (Coming Soon)</a
-            >
-          </li>
+          <li><a href="https://github.com/justmicho/hospitalDatabase" target="_blank">Hospital Database</a></li>
+          <li><a href="https://github.com/justmicho/chicago_lobbyist" target="_blank">Chicago Lobbyist</a></li>
+          <li><a href="https://github.com/justmicho/blackjack-game" target="_blank">BlackJack Game (Coming Soon)</a></li>
         </ul>
       </div>
     </div>
-    <script src="script.js"></script>
 
     <div class="suggestion-box">
       <h3 class="suggestion-header">Have a suggestion?</h3>
-      <textarea
-        id="suggestion"
-        placeholder="Share your thoughts..."
-        rows="4"
-      ></textarea>
-      <button id="submit-btn" onclick="submitSuggestion()">Submit</button>
+      <textarea id="suggestion" placeholder="Share your thoughts..." rows="4"></textarea>
+      <!-- was: onclick="submitSuggestion()" -->
+      <button id="submit-btn" type="button" data-action="submit-suggestion">Submit</button>
     </div>
+
+    <!-- Only external script; no inline <script> tags -->
+    <script src="script.js" defer></script>
   </body>
 </html>

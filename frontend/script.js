@@ -18,22 +18,28 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
     } catch (err) {
       lastErr = err;
       const wait = Math.min(1000 * 2 ** attempt, 10000);
-      console.log(`Attempt ${attempt + 1} failed: ${err?.message || err}. Retrying in ${wait}ms...`);
-      await new Promise(r => setTimeout(r, wait));
+      // Avoid inline styles/log formatting for CSP strictness
+      console.log(
+        `Attempt ${attempt + 1} failed: ${err?.message || err}. Retrying in ${wait}ms...`
+      );
+      await new Promise((r) => setTimeout(r, wait));
     }
   }
   throw lastErr || new Error(`Failed after ${maxRetries} attempts`);
 }
 
-// ---------- CHAT TOGGLE ----------
+// ---------- CHAT TOGGLE (if used somewhere else in your UI) ----------
 function toggleChat() {
   const widget = document.getElementById("chat-widget");
+  if (!widget) return;
   widget.style.display = widget.style.display === "none" ? "block" : "none";
 }
 
 // ---------- PREFILL CHAT ----------
 function setPrompt(text) {
-  document.getElementById("prompt").value = text;
+  const inputEl = document.getElementById("prompt");
+  if (!inputEl) return;
+  inputEl.value = text;
   askBot();
 }
 
@@ -46,15 +52,17 @@ function updateTime() {
   const hh = String(now.getHours()).padStart(2, "0");
   const min = String(now.getMinutes()).padStart(2, "0");
   const ss = String(now.getSeconds()).padStart(2, "0");
-  document.getElementById("timestamp").innerText = `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
+  const ts = document.getElementById("timestamp");
+  if (ts) ts.innerText = `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
 }
-setInterval(updateTime, 1000);
-updateTime();
 
 // ---------- CHATBOT FUNCTION ----------
 async function askBot() {
-  const input = document.getElementById("prompt").value;
+  const inputEl = document.getElementById("prompt");
   const responseEl = document.getElementById("response");
+  if (!inputEl || !responseEl) return;
+
+  const input = inputEl.value;
   responseEl.innerText = "Thinking...";
 
   try {
@@ -109,39 +117,44 @@ It's part of Dhimitri's personal portfolio website (justmicho.com). The site inc
 
     const data = await response.json();
     if (data?.choices?.length) {
-      document.getElementById("response").innerHTML = `
+      // Safe HTML injection (content comes from your backend/OpenAI—assumed sanitized/markdown-ish)
+      responseEl.innerHTML = `
         ${data.choices[0].message.content}
         <br>
-        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" class="resume-link" target="_blank">
+        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" class="resume-link" target="_blank" rel="noopener noreferrer">
           👉 Resume 👈
         </a>`;
     } else {
       responseEl.innerText = "Error: No response. Check backend logs.";
     }
   } catch (err) {
-    responseEl.innerText = "Error: " + err.message;
+    responseEl.innerText = "Error: " + (err?.message || String(err));
     console.error("Chat error:", err);
   }
 }
 
 // ---------- PROJECT MODAL ----------
 function openModal() {
-  document.getElementById("projectModal").style.display = "block";
+  const modal = document.getElementById("projectModal");
+  if (modal) modal.style.display = "block";
 }
 function closeModal() {
-  document.getElementById("projectModal").style.display = "none";
-}
-window.onclick = function (event) {
   const modal = document.getElementById("projectModal");
-  if (event.target === modal) closeModal();
-};
+  if (modal) modal.style.display = "none";
+}
 
 // ---------- SUGGESTION SUBMISSION ----------
 async function submitSuggestion() {
   const input = document.getElementById("suggestion");
-  const message = input.value.trim();
   const submitBtn = document.getElementById("submit-btn");
-  if (!message) return alert("Please enter a suggestion.");
+  if (!input || !submitBtn) return;
+
+  const message = input.value.trim();
+  if (!message) {
+    // Using alert is fine; it’s not CSP-related
+    alert("Please enter a suggestion.");
+    return;
+  }
 
   const originalText = submitBtn.textContent;
   submitBtn.textContent = "Submitting...";
@@ -177,10 +190,59 @@ async function submitSuggestion() {
   }
 }
 
-// ---------- WARM UP BACKEND ON PAGE LOAD ----------
-// Ping /ping (proxied by Netlify) to wake Render
-window.addEventListener("DOMContentLoaded", () => {
+// ---------- BINDINGS (no inline handlers) ----------
+document.addEventListener("DOMContentLoaded", () => {
+  // Warm up backend
   fetch(`${API_BASE}/ping`, { method: "GET" })
-    .then(() => console.log("Backend ready!"))
+    .then((r) => {
+      if (!r.ok) throw new Error(`/ping returned ${r.status}`);
+      console.log("Backend ready!");
+    })
     .catch(() => console.log("Backend warming up..."));
+
+  // Clock
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  // Buttons (no inline)
+  const askBtn = document.querySelector("[data-action='ask-bot']");
+  if (askBtn) askBtn.addEventListener("click", askBot);
+
+  const openModalBtn = document.querySelector("[data-action='open-modal']");
+  if (openModalBtn) openModalBtn.addEventListener("click", openModal);
+
+  const closeModalBtn = document.querySelector("[data-action='close-modal']");
+  if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
+
+  const submitSuggestionBtn = document.querySelector(
+    "[data-action='submit-suggestion']"
+  );
+  if (submitSuggestionBtn)
+    submitSuggestionBtn.addEventListener("click", submitSuggestion);
+
+  // Suggestion chips
+  document.querySelectorAll(".suggestions [data-prompt]").forEach((li) => {
+    li.addEventListener("click", () => {
+      const text = li.getAttribute("data-prompt");
+      setPrompt(text || "");
+    });
+  });
+
+  // Enter to submit in the search input
+  const promptInput = document.getElementById("prompt");
+  if (promptInput) {
+    promptInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        askBot();
+      }
+    });
+  }
+
+  // Close modal when clicking outside
+  window.addEventListener("click", (event) => {
+    const modal = document.getElementById("projectModal");
+    if (!modal) return;
+    if (event.target === modal) closeModal();
+  });
 });
