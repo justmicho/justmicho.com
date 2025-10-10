@@ -1,9 +1,12 @@
 import express from "express";
-import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+
+// ✅ Modern fetch: Node 18+ includes it globally, so no need to import node-fetch
+// If your Node version is older, uncomment below:
+// import fetch from "node-fetch";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, ".env") });
@@ -11,32 +14,34 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 
 /* -----------------------------
-   ✅ FIXED CORS (Local + Production)
+   ✅ UNIVERSAL CORS FIX (Render + Local)
 -------------------------------- */
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://justmicho.com",
-        "https://www.justmicho.com",
-      ];
 
-      // Allow curl/postman (no origin)
-      if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-      if (allowedOrigins.includes(origin)) {
-        console.log("✅ Allowed CORS origin:", origin);
-        callback(null, true);
-      } else {
-        console.warn("❌ Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+  // Allow any localhost, 127.0.0.1, 10.x.x.x, or your production domain
+  if (
+    !origin ||
+    origin.includes("localhost") ||
+    origin.includes("127.0.0.1") ||
+    origin.includes("10.0.0.") ||
+    origin.includes("justmicho.com")
+  ) {
+    res.header("Access-Control-Allow-Origin", origin || "*");
+  }
+
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 
 app.use(express.json());
 
@@ -58,7 +63,7 @@ app.post("/chat", async (req, res) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // ⚡ Fast lightweight model
+        model: "gpt-4o-mini",
         messages,
       }),
     });
@@ -79,7 +84,7 @@ app.post("/chat", async (req, res) => {
 });
 
 /* -----------------------------
-   💡 Suggestion Submission
+   💡 Suggestion Submission (Supabase)
 -------------------------------- */
 app.post("/submit-suggestion", async (req, res) => {
   const { message } = req.body;
@@ -108,6 +113,13 @@ app.post("/submit-suggestion", async (req, res) => {
     console.error("⚠️ Server error:", err);
     return res.status(500).json({ error: "Server error" });
   }
+});
+
+/* -----------------------------
+   🩵 Health Check
+-------------------------------- */
+app.get("/", (req, res) => {
+  res.send("✅ justmicho-backend is live and CORS-ready!");
 });
 
 /* -----------------------------
