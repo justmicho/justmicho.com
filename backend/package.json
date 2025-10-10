@@ -1,13 +1,15 @@
 {
-  "name": "justmicho-backend",
+  "name": "backend",
   "version": "1.0.0",
   "type": "module",
-  "engines": { "node": ">=18.17" },
+  "main": "server.mjs",
   "scripts": {
     "start": "node server.mjs"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0"
   }
