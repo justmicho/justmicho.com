@@ -1,26 +1,21 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// ✅ Modern fetch: Node 18+ includes it globally, so no need to import node-fetch
-// If your Node version is older, uncomment below:
-// import fetch from "node-fetch";
-
+// ✅ Node 18+ includes fetch globally
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
 /* -----------------------------
-   ✅ UNIVERSAL CORS FIX (Render + Local)
+   ✅ UNIVERSAL CORS FIX (Local + Render)
 -------------------------------- */
-
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  // Allow any localhost, 127.0.0.1, 10.x.x.x, or your production domain
+  // Allow local dev, LAN IPs, and your production domain
   if (
     !origin ||
     origin.includes("localhost") ||
@@ -35,13 +30,13 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
 
+  // ✅ Handle preflight
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    return res.status(200).end();
   }
 
   next();
 });
-
 
 app.use(express.json());
 
@@ -116,7 +111,7 @@ app.post("/submit-suggestion", async (req, res) => {
 });
 
 /* -----------------------------
-   🩵 Health Check
+   🩵 Health Check (for Render)
 -------------------------------- */
 app.get("/", (req, res) => {
   res.send("✅ justmicho-backend is live and CORS-ready!");
