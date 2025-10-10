@@ -33,7 +33,7 @@ async function askBot() {
     "Thinking...";
 
   try {
-    const response = await fetch("https://justmicho-backend.onrender.com/chat", {
+    const response = await fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -144,7 +144,7 @@ async function submitSuggestion() {
   }
 
   const res = await fetch(
-    "https://justmicho-backend.onrender.com/chat",
+    "/submit-suggestion",
     {
       method: "POST",
       headers: {
