@@ -22,9 +22,6 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Additional safety net - explicit OPTIONS handler for all routes
-app.options('*', cors());
-
 app.use(express.json());
 
 /* -----------------------------
