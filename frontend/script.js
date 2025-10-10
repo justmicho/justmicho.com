@@ -1,16 +1,22 @@
-// Toggle the visibility of the floating chat widget
+// ---------- AUTO BACKEND SWITCH ----------
+const BACKEND_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://justmicho-backend.onrender.com";
+
+// ---------- CHAT TOGGLE ----------
 function toggleChat() {
   const widget = document.getElementById("chat-widget");
   widget.style.display = widget.style.display === "none" ? "block" : "none";
 }
 
-// Prefill prompt input with a suggestion and automatically submit it
+// ---------- PREFILL CHAT ----------
 function setPrompt(text) {
   document.getElementById("prompt").value = text;
   askBot();
 }
 
-// Display current date and time, updating every second
+// ---------- CLOCK DISPLAY ----------
 function updateTime() {
   const now = new Date();
   const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -19,76 +25,61 @@ function updateTime() {
   const hh = String(now.getHours()).padStart(2, "0");
   const min = String(now.getMinutes()).padStart(2, "0");
   const ss = String(now.getSeconds()).padStart(2, "0");
-  const formatted = `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
-  document.getElementById("timestamp").innerText = formatted;
+  document.getElementById("timestamp").innerText = `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
 }
 setInterval(updateTime, 1000);
 updateTime();
 
-// Send prompt to backend and display AI-generated answer
+// ---------- CHATBOT FUNCTION ----------
 async function askBot() {
   const input = document.getElementById("prompt").value;
   const responseEl = document.getElementById("response");
-  responseEl.innerText =
-    "Thinking...";
+  responseEl.innerText = "Thinking...";
 
   try {
-    const response = await fetch("/chat", {
+    const response = await fetch(`${BACKEND_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         messages: [
           {
             role: "system",
-            content: `You are an AI chatbot that knows Dhimitri Dinella very well. If anyone asks a simple question not related to Dhimitri, politely inform them that you only answer questions about Dhimitri. If they ask about how this chatbot works, provide the full technical details at the end of your response.
+            content: `You are an AI chatbot that knows Dhimitri Dinella very well. 
+If anyone asks something unrelated to Dhimitri, politely say you only answer questions about him. 
+If they ask how this chatbot works, describe the technical setup.
 
-Here is some information about Dhimitri to help you answer questions:
-          
-          Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024. He earned a 3.7 GPA and was on the Dean’s List in 2023–2024. His coursework includes Software Engineering, Network Security, Database Design, and Data Structures.
-          
+Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024 (GPA 3.7, Dean’s List 2023–2024). 
+He studied Software Engineering, Network Security, Database Design, and Data Structures.
 
-          His most recent role was as a Technical Project Manager at Digital Design Corp where he:
-            Worked closely with product, engineering, R&D finance teams to manage hardware and SaaS product launches.
-             Spearheaded development of automation tools to streamline internal workflows across the Product Introduction and
-            RMA processes, reducing manual update time by 20–30 minutes per task.
-             Built and deployed Python-based Trac automation scripts leveraging requests, BeautifulSoup, and openpyxl to update
-            Excel milestones, post wiki entries, and import Trac tickets automatically.
-             Collaborated with engineering, finance, and product teams to automate license tracking and milestone reporting,
-            ensuring alignment across hardware and SaaS product lines.
-             Documented and standardized technical processes in Trac wiki pages, improving visibility and reducing onboarding
-            time for future project teams.
+His most recent role was Technical Project Manager at Digital Design Corp:
+- Led cross-functional work between product, R&D, finance, and engineering teams.
+- Automated Product Introduction and RMA processes (saving 20–30 minutes per task).
+- Built Trac automation scripts in Python (requests, BeautifulSoup, openpyxl).
+- Managed hardware + SaaS project milestones and reporting.
+- Documented workflows and standardized wiki templates for future teams.
 
-          He interned as a Project Manager at iCodice LLC, where he:
-          - Led cross-functional teams to deliver 5+ user-friendly web interfaces on time
-          - Analyzed and resolved website crash issues across two dev cycles
-          - Maintained strong communication with clients and stakeholders, achieving 95% satisfaction
-          
-          
-          
-          Dhimitri's key projects include:
-          - Hospital Management Database: Optimized SQL/ER model for 200+ patients
-          - Blackjack Game (in progress): A browser-based card game styled like a real casino table. Built using HTML, CSS, and JavaScript with interactive UI, card animations, and player/dealer logic under development.
-          - Chicago Lobbyist Database App: Python + SQLite app with 50,000+ records and data visualizations using Matplotlib
-          - **Pig Game**: A two-player dice game where players race to 100 points, built using HTML, CSS, and vanilla JavaScript
-          - **Guess My Number**: An interactive browser game where players try to guess a random number between 1–20, featuring real-time feedback and scoring logic in JavaScript, HTML and CSS
-          
-          He is proficient in JavaScript, Python, SQL, Java, HTML/CSS, C, and C++, and tools like Git, GitHub, Jira, IntelliJ, Arduino, and Visual Studio. Dhimitri is currently seeking roles in technical project management, automation, or software development.
-          
-          If anyone asks how this chatbot works, explain:
-          "This chatbot was built using HTML, CSS, and JavaScript for the frontend. It connects to a Node.js + Express backend hosted on Render and uses OpenRouter to access a GPT-like model. It’s integrated into Dhimitri’s personal site via a floating widget he designed.
+Before that, he interned at iCodice LLC as a Project Manager:
+- Delivered 5+ web interfaces on time.
+- Solved major crash bugs across two dev cycles.
+- Maintained strong communication with clients (95% satisfaction).
 
-          The website also features:
-          - A custom project showcase modal built with vanilla JavaScript and CSS
-          - A live clock display using the JavaScript Date API
-          - A suggestion box feature powered by Supabase (PostgreSQL backend as a service)
-          - Responsive layout and design using media queries
-          - Custom favicon and meta settings for branding
-          - A set of interactive JavaScript games (Guess My Number, Pig Game, Blackjack) styled with CSS and hosted as individual project pages
-          - GitHub integration and version control
-          - Deployment using Netlify for the frontend and Render for the backend
+Projects:
+- Hospital Management Database (SQL/ER for 200+ patients)
+- Chicago Lobbyist Database App (Python + SQLite + Matplotlib)
+- Blackjack (JS/HTML/CSS, in progress)
+- Pig Game (JS/HTML/CSS)
+- Guess My Number (JS/HTML/CSS)
 
-          This full-stack setup enables both static content and dynamic interaction through the AI assistant and live user suggestion system."
-`,
+Technical skills: JavaScript, Python, SQL, Java, HTML/CSS, C, C++; tools like Git, Jira, IntelliJ, Arduino, VS Code.
+
+If asked how this chatbot works:
+“This chatbot uses HTML/CSS/JS frontend (Netlify) + Node.js backend (Render) + OpenRouter API. 
+It’s part of Dhimitri’s personal portfolio website (justmicho.com). The site includes:
+- Dynamic AI assistant widget
+- Supabase-powered suggestion box
+- Responsive layout and live clock
+- JavaScript game demos (Guess My Number, Pig Game, Blackjack)
+- GitHub + PDF resume integration.”`
           },
           { role: "user", content: input },
         ],
@@ -100,10 +91,9 @@ Here is some information about Dhimitri to help you answer questions:
       responseEl.innerHTML = `
         ${data.choices[0].message.content}
         <br>
-        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" class="resume-link" target="_blank">
-          <span role="img" aria-label="point-right">👉</span>
-          <span>Resume</span>
-          <span role="img" aria-label="point-left">👈</span>
+        <a href="https://justmicho.com/Dhimitri_Dinella.pdf" 
+           class="resume-link" target="_blank">
+          👉 Resume 👈
         </a>
       `;
     } else {
@@ -114,17 +104,15 @@ Here is some information about Dhimitri to help you answer questions:
   }
 }
 
-// Open the modal for project selection
+// ---------- PROJECT MODAL ----------
 function openModal() {
   document.getElementById("projectModal").style.display = "block";
 }
 
-// Close the modal
 function closeModal() {
   document.getElementById("projectModal").style.display = "none";
 }
 
-// Close modal if clicked outside the modal content
 window.onclick = function (event) {
   const modal = document.getElementById("projectModal");
   if (event.target === modal) {
@@ -132,7 +120,7 @@ window.onclick = function (event) {
   }
 };
 
-// Submit a suggestion to Supabase and temporarily disable the button
+// ---------- SUGGESTION SUBMISSION ----------
 async function submitSuggestion() {
   const input = document.getElementById("suggestion");
   const message = input.value.trim();
@@ -143,34 +131,35 @@ async function submitSuggestion() {
     return;
   }
 
-  const res = await fetch(
-    "/submit-suggestion",
-    {
+  try {
+    const res = await fetch(`${BACKEND_URL}/submit-suggestion`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
+    });
+
+    if (res.ok) {
+      input.value = "";
+      submitBtn.textContent = "Submitted!";
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.6";
+
+      setTimeout(() => {
+        submitBtn.textContent = "Submit";
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+      }, 5000);
+    } else {
+      const errorText = await res.text();
+      console.error("Something went wrong:", errorText);
+      alert("Something went wrong. Please try again.");
     }
-  );
-
-  if (res.ok) {
-    input.value = "";
-    submitBtn.textContent = "Submitted!";
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = "0.6";
-
-    setTimeout(() => {
-      submitBtn.textContent = "Submit";
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = "1";
-    }, 5000);
-  } else {
-    const errorText = await res.text();
-    console.error("Something went wrong:", errorText);
-    alert("Something went wrong. Please try again.");
+  } catch (err) {
+    console.error("Error submitting suggestion:", err);
+    alert("Network error. Please try again.");
   }
 }
+
 
 // http://localhost:3000/chat -->
 // https://justmicho-com.onrender.com/chat
