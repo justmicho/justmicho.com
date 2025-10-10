@@ -1,4 +1,3 @@
-// server.mjs
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -7,40 +6,39 @@ dotenv.config();
 
 const app = express();
 
-// --- CORS (put this BEFORE routes) ---
+/* ---------- CORS ---------- */
 const ALLOWED_ORIGINS = [
   "https://www.justmicho.com",
   "https://justmicho.com",
-  "http://localhost:3000",   // your local backend
-  "http://localhost:5173",   // common local front-end dev ports (optional)
-  "http://127.0.0.1:5173"
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
 ];
 
-app.use(cors({
+const corsMw = cors({
   origin(origin, cb) {
-    // allow non-browser requests (curl/postman) with no Origin
     if (!origin) return cb(null, true);
     if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
     return cb(new Error(`CORS: Origin ${origin} not allowed`));
   },
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: false,       // set true only if you use cookies/auth headers that require it
-  maxAge: 86400             // cache preflight for a day
-}));
+  credentials: false,
+  maxAge: 86400,
+});
 
-// Respond to preflight quickly
-app.options("*", cors());
-
-// --- Body parsing ---
+app.use(corsMw);
 app.use(express.json());
 
-// --- Health checks ---
-app.get("/", (_req, res) => res.send("OK"));
-app.get("/ping", (_req, res) => res.json({ ok: true, ts: Date.now() }));
+// Handle preflight for all routes (Express 5-safe)
+app.options("(.*)", corsMw);
 
-// --- Chat endpoint ---
-app.post("/chat", async (req, res) => {
+/* ---------- Health ---------- */
+app.get("/", (_req, res) => res.send("OK"));
+app.get("/ping", corsMw, (_req, res) => res.json({ ok: true, ts: Date.now() }));
+
+/* ---------- Chat ---------- */
+app.post("/chat", corsMw, async (req, res) => {
   try {
     const { messages } = req.body || {};
     if (!Array.isArray(messages)) {
@@ -56,10 +54,10 @@ app.post("/chat", async (req, res) => {
       body: JSON.stringify({ model: "gpt-4o-mini", messages }),
     });
 
-    const ct = (r.headers.get("content-type") || "");
+    const ct = (r.headers.get("content-type") || "").toLowerCase();
     const data = ct.includes("application/json") ? await r.json() : { error: await r.text() };
-    if (!r.ok) return res.status(r.status).json(data);
 
+    if (!r.ok) return res.status(r.status).json(data);
     return res.json(data);
   } catch (e) {
     console.error("CHAT ROUTE ERROR:", e);
@@ -67,8 +65,8 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-// --- Suggestions endpoint ---
-app.post("/submit-suggestion", async (req, res) => {
+/* ---------- Suggestions ---------- */
+app.post("/submit-suggestion", corsMw, async (req, res) => {
   try {
     const { message } = req.body || {};
     if (!message) return res.status(400).json({ error: "Message is required" });
