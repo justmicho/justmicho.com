@@ -3,38 +3,25 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// ✅ Node 18+ includes fetch globally
+// Node 18+ has global fetch
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
 /* -----------------------------
-   ✅ UNIVERSAL CORS FIX (Local + Render)
+   ✅ CORS: Wildcard + no credentials (Render-proof)
 -------------------------------- */
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  // Allow local dev, LAN IPs, and your production domain
-  if (
-    !origin ||
-    origin.includes("localhost") ||
-    origin.includes("127.0.0.1") ||
-    origin.includes("10.0.0.") ||
-    origin.includes("justmicho.com")
-  ) {
-    res.header("Access-Control-Allow-Origin", origin || "*");
-  }
-
+  // Allow ALL origins (safe because we do NOT use cookies/credentials)
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
 
-  // ✅ Handle preflight
+  // Preflight short-circuit
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-
   next();
 });
 
@@ -45,7 +32,6 @@ app.use(express.json());
 -------------------------------- */
 app.post("/chat", async (req, res) => {
   const messages = req.body.messages;
-
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: "Messages array is required" });
   }
@@ -70,7 +56,6 @@ app.post("/chat", async (req, res) => {
       return res.status(response.status).json({ error: data });
     }
 
-    console.log("🤖 OpenAI response OK");
     res.json(data);
   } catch (err) {
     console.error("⚠️ Server error:", err);
@@ -111,10 +96,10 @@ app.post("/submit-suggestion", async (req, res) => {
 });
 
 /* -----------------------------
-   🩵 Health Check (for Render)
+   🩵 Health Check
 -------------------------------- */
-app.get("/", (req, res) => {
-  res.send("✅ justmicho-backend is live and CORS-ready!");
+app.get("/", (_req, res) => {
+  res.send("✅ justmicho-backend is live and CORS-* ready!");
 });
 
 /* -----------------------------
