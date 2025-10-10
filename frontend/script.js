@@ -46,13 +46,9 @@ Here is some information about Dhimitri to help you answer questions:
           
           Dhimitri is a Computer Science graduate from the University of Illinois at Chicago (UIC), class of December 2024. He earned a 3.7 GPA and was on the Dean’s List in 2023–2024. His coursework includes Software Engineering, Network Security, Database Design, and Data Structures.
           
-          He interned as a Project Manager at iCodice LLC, where he:
-          - Led cross-functional teams to deliver 5+ user-friendly web interfaces on time
-          - Analyzed and resolved website crash issues across two dev cycles
-          - Maintained strong communication with clients and stakeholders, achieving 95% satisfaction
-          
-          He also worked as a Technical Project Manager at Digital Design Corp where he:
-            Worked closely with product, engineering, R&Dand finance teams to manage hardware and SaaS product launches.
+
+          His most recent role was as a Technical Project Manager at Digital Design Corp where he:
+            Worked closely with product, engineering, R&D finance teams to manage hardware and SaaS product launches.
              Spearheaded development of automation tools to streamline internal workflows across the Product Introduction and
             RMA processes, reducing manual update time by 20–30 minutes per task.
              Built and deployed Python-based Trac automation scripts leveraging requests, BeautifulSoup, and openpyxl to update
@@ -61,6 +57,13 @@ Here is some information about Dhimitri to help you answer questions:
             ensuring alignment across hardware and SaaS product lines.
              Documented and standardized technical processes in Trac wiki pages, improving visibility and reducing onboarding
             time for future project teams.
+            
+          He interned as a Project Manager at iCodice LLC, where he:
+          - Led cross-functional teams to deliver 5+ user-friendly web interfaces on time
+          - Analyzed and resolved website crash issues across two dev cycles
+          - Maintained strong communication with clients and stakeholders, achieving 95% satisfaction
+          
+          
           
           Dhimitri's key projects include:
           - Hospital Management Database: Optimized SQL/ER model for 200+ patients
