@@ -4,18 +4,18 @@
 [[headers]]
   for = "/*"
   [headers.values]
-  Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://localhost:3000 https://justmicho-backend.onrender.com https://api.openai.com https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://localhost:3000 https://justmicho-com.onrender.com https://api.openai.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 # --- proxy API to Render (same-origin in prod) ---
 [[redirects]]
   from = "/chat"
-  to = "https://justmicho-backend.onrender.com/chat"
+  to = "https://justmicho-com.onrender.com/chat"
   status = 200
   force = true
 
 
 [[redirects]]
   from = "/ping"
-  to = "https://justmicho-backend.onrender.com/ping"
+  to = "https://justmicho-com.onrender.com/ping"
   status = 200
   force = true

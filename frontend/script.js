@@ -8,7 +8,7 @@ const isLocal =
 
 const API_BASE = isLocal
   ? "http://localhost:3000"
-  : "https://justmicho-backend.onrender.com";
+  : "https://justmicho-com.onrender.com";
 
 window.API_BASE = API_BASE; // for console debugging
 console.log("API_BASE", API_BASE);
