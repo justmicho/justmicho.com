@@ -33,7 +33,7 @@ async function askBot() {
     "Thinking...";
 
   try {
-    const response = await fetch("http://localhost:3000/chat", {
+    const response = await fetch("https://justmicho-backend.onrender.com/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -57,7 +57,7 @@ Here is some information about Dhimitri to help you answer questions:
             ensuring alignment across hardware and SaaS product lines.
              Documented and standardized technical processes in Trac wiki pages, improving visibility and reducing onboarding
             time for future project teams.
-            
+
           He interned as a Project Manager at iCodice LLC, where he:
           - Led cross-functional teams to deliver 5+ user-friendly web interfaces on time
           - Analyzed and resolved website crash issues across two dev cycles
@@ -144,7 +144,7 @@ async function submitSuggestion() {
   }
 
   const res = await fetch(
-    "http://localhost:3000/submit-suggestion",
+    "https://justmicho-backend.onrender.com/chat",
     {
       method: "POST",
       headers: {
